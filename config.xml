@@ -3,10 +3,8 @@
     <description>
         Example For APICloud.
     </description>
-    <author email="developer@apicloud.com" href="http://www.apicloud.com">
-        Developer
-    </author>
-    <content src="index.html" />
+    <author email="admin@newstartsoft.com" href="http://www.jisupeixun.com">        极速培训    </author>
+      <content src="login.html#xuexi" />
     <access origin="*" />
     <preference name="pageBounce" value="false"/>
 	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>
@@ -18,7 +16,7 @@
 	<preference name="fullScreen" value="false"/>
 	<preference name="autoUpdate" value="true" />
 	<preference name="smartUpdate" value="false" />
-	<preference name="debug" value="true"/>
+	<preference name="debug" value="false"/>  <!--配置状态栏和页面是否重合（沉浸式效果）-->  <preference name="statusBarAppearance" value="false"/>
 	<preference name="statusBarAppearance" value="true"/>
 	<permission name="readPhoneState" />
 	<permission name="camera" />
@@ -27,5 +25,8 @@
 	<permission name="fileSystem" />
 	<permission name="internet" />
 	<permission name="bootCompleted" />
-	<permission name="hardware" />
+	<permission name="hardware" />  <!--引入百度播放器SDK-->
+  <feature name="bPlayer">
+        <param name="AccessKey" value="7200a73f5c7042b9a1cddd897de56bb3"/>
+  </feature>
 </widget>

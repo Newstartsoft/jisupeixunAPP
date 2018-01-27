@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>课程播放界面</title>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="../../res/css/light7.min.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="../../res/icon/iconfont.css">
+
+</head>
+ <body class="tabbar-hidden"><!--class="theme-dark" 开启夜间模式-->
+
+<!--系统第一部分，界面组-->
+ <div class="page-group">
+  <!--单个界面，如果多个界面page-current代表默认显示的-->
+ <div class="page page-current no-tabbar" id="renwu_detail">
+  <!--界面标题-->
+  <header class="bar bar-nav theme-dark" style="background: #313131">
+        <a class="button button-link button-nav pull-left " onclick="renwu_detail_black()">
+                  <i class="iconfont icon-shangyiye2"></i>
+        </a>
+        <button class="button pull-right open-popover qingxidu" data-popover=".popover-qingxidu" style="display: none;">
+      标清
+    </button>
+        <a class="icon pull-right iconfont icon-gengxin1" style="color: #fff" onclick="tongbu()">
+        </a>
+        <h1 class="title" id="cname">课程的名字</h1>
+    </header>
+<style type="text/css">
+.shanguang{width: 50%;height: 5rem;overflow: hidden;position: relative; margin: 3rem auto; text-align: center;}
+.shanguang img{max-width: 210px; width: 100%;}
+.shanguang .baiguang{position: absolute;width: 3rem;height: 3rem;top: 0;
+            left: -5rem;overflow: hidden;background-image: linear-gradient(to right,rgba(255,255,255,.2) 0,rgba(255,255,255,.5) 50%,rgba(255,255,255,.2) 100%);/*linear-gradient渐变效果*/
+            transform: skewX(-25deg);/*沿x轴倾斜*/
+            animation: shanguang 3s;
+            animation-iteration-count:1000;}
+ @keyframes shanguang {
+            from { left: -5rem;}
+            to { left: 18rem;}
+ }
+.keshow{background: #313131;background:-moz-linear-gradient(top, #313131,  #3d3d3d);background:-webkit-gradient(linear, 0 0, 0 bottom, from(#313131), to(#3d3d3d));}
+#kechengmingxi .active{ border-left: 0.2rem #39f solid; }
+#playText{ background-color:#FFF;}
+ h2{ border-bottom: 1px #ddd solid;margin:0.5rem 0; padding: 0.5rem 0;}
+#renwu_detail .jisutext{height: 25rem; background: #fff; color: #6d6d72}
+#renwu_detail .jisuvideo{height: 10rem;}
+#renwu_detail .embed-responsive-item{ width: 100%; height: 25rem; }
+.enrol_course_info_btn_bottom	{	text-align: center;}
+.enrol_course_info_btn_bottom button	{	border: none;
+	border-radius: 3px;
+	color: #FFF;
+	text-align: center;
+	font-size: 16px;
+	padding: 7px 0px;
+	width: 55%;
+	margin: 6px 0px;
+	transition: 0.5s;
+	cursor: pointer;
+}
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_info	{
+	background-color: rgb(0, 132, 255);
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_info:hover
+	{
+	background-color: rgb(0, 114, 255);
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_info:after
+	{
+	content: '已报名';
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_noenrol
+	{
+	background-color: rgb(218, 0, 36);
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_noenrol:hover
+	{
+	background-color: rgb(200, 0, 36);
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_noenrol:after
+	{
+	content: '报名';
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_closed
+	{
+	background-color: rgb(169, 169, 169);
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_closed:hover
+	{
+	background-color: rgb(151, 151, 151);
+}
+
+ .enrol_course_info_btn_bottom .enrol_course_info_btn_bottom_closed:after
+	{
+	content: '已截止';
+}
+.enrol_course_info_btn_content_header{ text-align: center; }
+</style>
+<!--课程展示区-->
+<div class="bar bar-header-secondary theme-dark keshow jisuvideo" style="padding: 0;overflow-y:auto;"
+ id="kecheng_play_mian_top_play">
+ 	<div class="shanguang">
+        <img src="../../res/img/logo_fff.png" alt="加载中..."  />
+        <div class="baiguang"></div>
+    </div>
+</div>
+    <!--界面内容-->
+  <div class="content" id="kechengContent" style="top: 12rem">
+  <!--打开线下和文档-->
+<div id="playText">
+
+</div>
+
+
+
+	<div class="buttons-tab fixed-tab" data-offset="44">
+      <a href="#tab1" class="tab-link active button" id="chapterList" onclick="chapterZK()">章节</a>
+      <a href="#tab2" class="tab-link button">简介</a>
+      <a href="#tab3" class="tab-link button" style="display: none;">问答</a>
+    </div>
+
+    <div class="tabs">
+      <div id="tab1" class="tab active">
+        <div class="content-block" style="padding:0;" id="kechengmingxi">
+
+        </div>
+      </div>
+      <div id="tab2" class="tab">
+       <div class="list-block media-list inset">
+			    <ul>
+			      <li>
+			        <div class="item-content">
+			          <div class="item-media"><img src="../res/img/avatar.png" style='width: 2.2rem;border-radius:50%'></div>
+			          <div class="item-inner">
+			            <div class="item-title-row">
+			              <div class="item-title" id="lecturer">刘德华</div>
+			            </div>
+			            <div class="item-subtitle" id="gongsi"></div>
+			          </div>
+                      <span class="link" style="width: 150px;" id="collectionbutton"><i class="iconfont"></i><span>收藏</span></span>
+                      <!-- onclick="collectionCourse()"  -->
+			        </div>
+			      </li>
+			    </ul>
+			  </div>
+        <div class="content-block">
+
+           <p class="content-block-title">课程简介</p>
+           <p id="courseDetailed"></p>
+        </div>
+      </div>
+      <div id="tab3" class="tab">
+
+
+        <div class="content-block">
+          <center>暂无互动</center>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+
+</div>
+
+
+
+
+<!--page1结束-->
+</div>
+<div class="popover popover-qingxidu">
+  <div class="popover-angle"></div>
+  <div class="popover-inner">
+    <div class="list-block">
+      <ul class="videotypelist">
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+<script type='text/javascript' src='../../res/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='../../res/js/light7.min.js' charset='utf-8'></script>
+<script type="text/javascript" src='../../res/pdf2/pdf.js' charset='urf-8'></script>
+<script type="text/javascript" src='../../res/pdf2/Base64.js' charset='urf-8'></script>
+<script type='text/javascript' src='../../res/js/light7-swiper.min.js' charset='utf-8'></script>
+<script type='text/javascript' src="http://180.76.156.234:9187/resources/ckplayer/ckplayer.js"></script>
+<script src="../../res/js/jquery-1.10.2.min.js" type="text/javascript"></script>
+<link href="../../res/webuploader/css/webuploader.css" rel="stylesheet" type="text/css" />
+<script src="../../res/webuploader/js/webuploader.min.js" type="text/javascript"></script>
+<script type='text/javascript' src="../../res/jisupeixun.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>任务详情</title>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="/app/favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="../../res/css/light7.min.css">
+    <link rel="stylesheet" type="text/css" href="../../res/icon/iconfont.css">
+    <style type="text/css">
+    .shuqian-down{width: 70px; position: relative; left: 10px;z-index:9999; }
+    .shuqian-down .end{border-left-color: #3d4145;border-right-color: #3d4145;}
+    .shuqian-down .shuqian {width: 0;height: 50px;border-left: 33px solid #3d4145;border-right: 33px solid #3d4145;border-bottom: 10px solid transparent;color: #fff;position:absolute;transition:all 0.3s ease 0s;}
+.shuqian-down .shuqiantext{ position: absolute; display: block; top: 8px; width: 100%; text-align: center;  color: #fff; font-size: 12px; transition:all 0.3s ease 0s; text-align: center;}
+    </style>
+</head>
+
+ <body ><!--class="theme-dark" 开启夜间模式-->
+
+<!--系统第一部分，界面组-->
+ <div class="page-group">
+  <!--单个界面，如果多个界面page-current代表默认显示的-->
+ <div class="page page-current no-tabbar" id="renwu_info">
+  <!--界面标题-->
+  <header class="bar bar-nav">
+        <a class="button button-link button-nav pull-left" onclick="renwu_info_black()">
+                  <i class="iconfont icon-shangyiye2"></i> 
+                  返回
+        </a>
+        <!--<button class="button button-link button-nav pull-right">
+          说明
+        </button>-->
+        <h1 class="title">任务的名称</h1>
+
+    </header>
+
+    <!--界面内容-->
+  <div class="content" id="content_xq">
+
+  </div>
+
+  <!--底部菜单-->
+  <div class="bar bar-footer" style="display:none;">
+  <a class=" pull-left"><i class="icon iconfont icon-jilu2"></i> 通过考试完成任务</a>
+
+  <a href="http://www.baidu.com" class="button button-fill pull-right external">考试</a>
+  </div>
+</div>
+
+
+
+
+<!--page1结束-->
+</div>
+
+
+
+
+<!--系统第二部分， popup, panel 等放在这里 -->
+<div class="panel-overlay"></div>
+    <div class="popup popup-about">
+          <div class="content-block">
+            <p>About</p>
+            <p><a href="#" class="close-popup">Close popup</a></p>
+            <p>Lorem ipsum dolor ...</p>
+          </div>
+</div>
+
+
+
+<script type='text/javascript' src='../../res/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='../../res/js/light7.min.js' charset='utf-8'></script>
+<script type="text/javascript" src='../../res/pdf2/pdf.js' charset='urf-8'></script>
+<script type="text/javascript" src='../../res/pdf2/Base64.js' charset='urf-8'></script>
+<script type='text/javascript' src="http://180.76.156.234:9187/resources/ckplayer/ckplayer.js"></script>
+<script src="../../res/js/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="../../res/webuploader/js/webuploader.min.js" type="text/javascript"></script>
+<script type='text/javascript' src="../../res/jisupeixun.js"></script>
+</body>
+</html>
