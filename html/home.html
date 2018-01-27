@@ -570,19 +570,17 @@ function openDownManager(){
           if(ret.hasOwnProperty('event'))//关闭窗口时
           {
              //$.toast('关闭窗口时');
-
           }
           else
           {
               //打开文件时候触发
-              console.log(ret);
+              abc();
+              console.log(JSON.stringify(ret));
               var fileobj = {};
               fileobj.upId = ret.id;
               fileobj.fileType =undefined;//ret.mimeType;文件后缀名，传空，自动截取
               fileobj.filepreview =  ret.savePath; //预览地址
-
-              openfile(fileobj);
-
+              openfile1(ret.savePath);
           }
       } else {
           //alert();

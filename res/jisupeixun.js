@@ -16,6 +16,7 @@ var allgroupname="";
 var allrolename="";
 var FreshLoadimgImg = "{pull: ['fs://wgt/images/loading_more.gif'],load: ['fs://wgt/images/loading_more.gif']}";
 var playerHeight = 200;
+
 //手机判断
 var browser = {
     versions: function () {
@@ -40,6 +41,7 @@ var browser = {
 
 try{$.noConflict();}catch(e){}
 $(document).on("pageInit", function(e, id, $page) {
+  abc();
   try{
     bPlayer.close();  //此处主要是为了防止视频还在后台播放，所以此处加上关闭
     //GetConnectionType();
@@ -71,7 +73,6 @@ $(document).on("pageInit", function(e, id, $page) {
      if(myhash!=""&&myhash!="login"&&myhash!=null){
           stuInfo();
      }
-    console.log('myhash' + myhash);
     //退出登录  exitLogin
     $(document).on('click','#exitLogin', function () {
                  localStorage.setItem("userinfo", "");
@@ -241,8 +242,16 @@ function getTotleInfo(userinfo){
         return fmt;
     }
 //监听浏览器返回  修改title
-//后腿事件
+//后退事件
 $(window).on('popstate', function () {
+    try{
+      console.log("asdfasd");
+      bPlayer.stop();
+      bPlayer.hide();
+      bPlayer.close();
+      bPlayer.hide();
+      console.log("asdfasd123");
+    }catch(e){}
     var myhash = window.location.hash; //获得#后的内容
      if(isWeiXin()){
            if(myhash =="#ziliao"||myhash=="ziliao"){
@@ -420,7 +429,6 @@ $(document).on("pageInit", "#xuexi", function (e, id, $page,window) {
 //                                block+="<li><a href='#renwu' class='item-link item-content'><div class='item-media'>星期" + "日一二三四五六".charAt(d1)+"</div><div class='item-inner'><div class='item-title-row'><div class='item-title'>线下地址："+data.datas[i].typeName+"</div></div><div class='item-text'>线下结束时间："+data.datas[i].endDate+"</div></div></a></li>";
                                 block+="<li><div onClick='openKe_collection(" + JSON.stringify(data.datas[i].courseId) + ")'> <img  src='"+data.datas[i].courseInfo.course_img+"' onerror='javascript:this.src=\"/images/train/fengmian000.gif\"' height=70  /><span class='tishi jinji'>星期"+ "日一二三四五六".charAt(d1)+"过期</span><span class='ckm'>"+data.datas[i].typeName+"<br /></span><span class='ckjz'>截止日期"+data.datas[i].endDate+"</span></div></li>";
                            }
-console.log(block);
                                 if(block!=""){
                                         $(".lishi").show();
                                         $("#tixingTask").html(block);
@@ -715,21 +723,24 @@ $(document).on("pageInit", "#renwu_info", function (e, id, $page) {
  //后退
     function renwu_info_black(){
         $.showIndicator(); //loading
-        $.router.back("/app/home.html#renwu");
+        $.router.back("../../home.html#renwu");
         $(".title").html("任务");
     }
      //后退
     function renwu_detail_black(){
         $.showIndicator(); //loading
-        $.router.back("/app/peixun/info.html?arrangeId="+QueryString("arrangeId"));
-        //关闭播放器
+        console.log("课程播放界面后退");
         try{bPlayer.close();}catch(e){}
+        $.router.back("../peixun/info.html?arrangeId="+QueryString("arrangeId"));
+        //关闭播放器
         //$(".title").html("任务");
     }
     //打开试卷
 function openSj(data,arrangeId) {
+  try{
+    bPlayer.close();
+  }catch(e){}
     sysUserInfo=getUserInfo();
-
     //历史试卷
     if(arrangeId==99||arrangeId=="99"){
         //随机卷
@@ -755,6 +766,9 @@ function openSj(data,arrangeId) {
 //打开题库
 function openTi(obj){
     //$.toast("暂未开放");
+    try{
+      bPlayer.close();
+    }catch(e){}
     var arrangeId=QueryString("arrangeId");
     //window.location.href =domain+"/member/index.html#/home/stuquelist/"+obj.knowledge_Id+"/"+arrangeId+"&arrangeId="+arrangeId+"&passtype="+obj.know_select_que_type+"&pass="+obj.know_select_que_num+"&typeId=0&knowledgeName="+obj.knowledge_Name;
     //:xid/:knowledgeId/:passtype/:pass/:typeId/:knowledgeName/:arrangeId/:userId
@@ -837,6 +851,7 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
     csm.list=[];
    // $.showPreloader();//显示Loading
     var PlayCourse = GetlocalStorage("PlayCourse"); //获得课程对象
+
     //如果从微信跳转，只有课程id
     //需要从新获取课程信息
     if((PlayCourse==""||PlayCourse==null||PlayCourse==undefined||PlayCourse.courseId!=QueryString("courseId"))&&QueryString("courseId")){
@@ -909,10 +924,9 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                //拼接下载按钮
                var xiazaihtml = "";
                if(csobj.stypename == "视频"){
-                  var chapterobj = csobj.chapterJson;
-                  console.log(chapterobj);
-                  if(chapterobj.fileType != "m3u8"){
-                    xiazaihtml = "<i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj.filepreview+"',savePath: 'cacheDir://"+csobj.CSFILEID + "/" + chapterobj.fileName +"',iconPath:'"+chapterobj.filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i>";
+                  var chapterobj = eval(csobj.chapterJson);
+                  if(chapterobj[0].fileType != "m3u8"){
+                    xiazaihtml = "<i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj[0].filepreview+"',savePath: 'cacheDir://极速培训/"+csobj.CSFILEID + "/" + chapterobj[0].fileName +"',iconPath:'"+chapterobj[0].filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i>";
                   }
                }
                zjhtml+= "<li class=\"item-content\" id='kecheng_"+csobj.CSID+"' onClick='bofang("+JSON.stringify(csobj)+")'><div class=\"item-inner\"><div class=\"item-title\" style=\"min-width:75%;\">"+csobj.CSNAME.replace(/<\/?[^>]*>/g,'')+"</div>";
@@ -1097,7 +1111,6 @@ function bofang(xiaojie) {
 
           $(".qingxidu").show();
             var jsonlist = JSON.parse(data);
-
             if(jsonlist.errorcode == "0"){
 
                     //console.log(jsonlist.datas);
@@ -1214,12 +1227,8 @@ function bofang(xiaojie) {
                             videoHtml += "<li class=\"" + item.site + "\" data=\""+item.file+"\" ><a class='list-button item-link' href='#' onclick='switchVideo(\""+item.file+"\",\""+item.qxd+"\")'>"+item.qxd+"</a></li>";
                         });
                     }
-
                     if(videoHtml != ""){
                         $(".videotypelist").html(videoHtml);
-
-
-
                         var okayUrl ="";
                         var qxd ="";
                         //寻找多版本视频中，默认播放的地址（优先级与PC端有所区别）
@@ -1244,12 +1253,8 @@ function bofang(xiaojie) {
                             qxd ="临时";
                             //文件转化中或转化出错了！(先播放转化前的版本)
                             okayUrl = jsonlist.datas[0].URL;
-
                         }
-
                         switchVideo(okayUrl,qxd);
-                        //console.log("xxx"+okayUrl);
-
                     }else{
 
                          $.toast('无法解析到课程播放视频！');
@@ -1260,22 +1265,17 @@ function bofang(xiaojie) {
                     $(".qingxidu").removeClass("qingxidu");
                 }
         });
-
         // 清除计时器
         clearInterval(jisuJSQ);
         jisuJSQ = null;
         jsqkq = false;
-
         // 防止暂停时值被更新
         setTimeout(function() { Tstate = 1;},500);
         //判断是否需要播放计时，如果需要启动计时器
         learningJSQ(xiaojie);
-
-
         //修改播放课程图标显示
         $("#kechengmingxi .item-content").removeClass("active");
         $("#kecheng_"+xiaojie.CSID).addClass("active");
-
       return;
     }
     else{ //v1.0录入的数据
@@ -1364,7 +1364,6 @@ function bofang(xiaojie) {
     //修改播放课程图标显示
     $("#kechengmingxi .item-content").removeClass("active");
     $("#kecheng_"+xiaojie.CSID).addClass("active");
-
 }
 //考试功能
 var playSectionalExamination = function(courseDetailedJson) {
@@ -1403,29 +1402,22 @@ this.playTeachingOffline = function(divid,courseDetailedJson) {
     if(!QueryString("courseId")){
         //放入对象中
         var xxobj={pid:courseDetailedJson.CSID,ptype:4,pstate:1};
-
-
         var days = null;
         var nowDate = new Date();
         if (courseDetailedJson.CSSTIME == undefined || courseDetailedJson.CSSTIME =="")
             days = "999";
         else {
-
             var datereplace=startTime = courseDetailedJson.CSSTIME.replace(/\-/g, "/");
             console.log(datereplace);
             var startDate = new Date(datereplace);
-
             var nowDateTime = nowDate.getTime();
             var startDateTime = startDate.getTime();
-
             // 计算相差天数
             if (nowDateTime >= startDateTime)
                 days = 0;
             else
                 days = -(Math.floor((nowDateTime - startDateTime)
                         / (24 * 3600 * 1000)));
-
-
         }
 
         // 线下授课
@@ -1783,119 +1775,121 @@ function isConfirmTongbu(msg){
 }
 // 内容加载器
 var mainplayer = function(Cantent, Height, mima) {
-    // / <summary>
-    // / 总内容加载器，可装载各类内容
-    // / </summary>
-    // 设置外框架
-    $("#" + Cantent).height("10rem");
-    // 设置课程列表
-    $("#kechengContent").css("top","12rem");
-    this.AddHtml = function(Cantent, Height, mima) {
-        // / <summary>
-        // / 静态类内容
-        // / </summary>
-        $("#" + Cantent).html("");
-        $("#" + Cantent).append(
-                "<iframe class=\"embed-responsive-item\" style=\"height:16rem\" src='" + mima
-                        + "'></iframe>");
-        // 设置外框架
-        $("#" + Cantent).height("16rem");
-        // 设置课程列表
-        $("#kechengContent").css("top","18.2rem");
+  // / <summary>
+  // / 总内容加载器，可装载各类内容
+  // / </summary>
+  // 设置外框架
+  $("#" + Cantent).height("10rem");
+  // 设置课程列表
+  $("#kechengContent").css("top","12rem");
+  window.AddHtml = function(Cantent, Height, mima) {
+      // / <summary>
+      // / 静态类内容
+      // / </summary>
+      $("#" + Cantent).html("");
+      $("#" + Cantent).append(
+              "<iframe class=\"embed-responsive-item\" style=\"height:16rem\" src='" + mima
+                      + "'></iframe>");
+      // 设置外框架
+      $("#" + Cantent).height("16rem");
+      // 设置课程列表
+      $("#kechengContent").css("top","18.2rem");
+      try{
+        bPlayer.close();
+      }catch(e){}
+  }
+  window.AddVideo = function(Cantent, Height, mima) {
+      // / <summary>
+      // / 增加视频组件
+      // / </summary>
+      //videoplayer.play(Cantent, Height, mima);
+      BaiDuPlayer.play(Cantent, Height, mima);
+  }
+  window.ADDflash = function(Cantent, Height, mima) {
+      // / <summary>
+      // / 增加FLASH组件
+      // / </summary>
+      $("#" + Cantent).html("<div id='a1'></div>");
+      var params = {
+          bgcolor : '#000',
+          allowFullScreen : true,
+          allowScriptAccess : 'always',
+          wmode : 'opaque'
+      };
+      var flashvars = {};
+      var attributes = {
+          id : 'game_ring',
+          name : 'game_ring'
+      };
+      swfobject.embedSWF(mima, "a1", "100%", Height, "10.2.0",
+              "expressInstall.swf", flashvars, params, attributes);//这个swf是flash安装包
+              try{
+                bPlayer.close();
+              }catch(e){}
+  }
+  window.AddSanFang = function(Cantent, Height, mima) {
+      // / <summary>
+      // / 暂时不支持的后缀名格式，提供下载
+      // / </summary>
+       $("#" + Cantent)
+       .html(
+       "<div class=\"jumbotron\"><center><a class=\"btn btn-info btn-lg\" href=\""
+       + mima + "\" target=\"_blank\" role=\"button\"><i class=\"glyphicon glyphicon-download\"></i> 点击下载</a></center></div>");
+       try{
+         bPlayer.close();
+       }catch(e){}
+  }
+  window.AddOffice = function(Cantent, Height, mima) {
+     // 设置外框架
+      $("#" + Cantent).height("auto");
+      // 设置课程列表
+      $("#kechengContent").css("top","2.2rem");
+      // / <summary>
+      // / 增加文档播放组件
+      // / </summary>
+       $("#" + Cantent).html("<iframe class=\"embed-responsive-item\" src='" +  "../../res/pdf2/officeshow/web/viewer.html?file=" +
+        base64encode(encodeURI(mima)) + "'></iframe>");
         try{
           bPlayer.close();
         }catch(e){}
-    }
-    this.AddVideo = function(Cantent, Height, mima) {
-        // / <summary>
-        // / 增加视频组件
-        // / </summary>
-        //videoplayer.play(Cantent, Height, mima);
-        BaiDuPlayer.play(Cantent, Height, mima);
-    }
-    this.ADDflash = function(Cantent, Height, mima) {
-        // / <summary>
-        // / 增加FLASH组件
-        // / </summary>
-        $("#" + Cantent).html("<div id='a1'></div>");
-        var params = {
-            bgcolor : '#000',
-            allowFullScreen : true,
-            allowScriptAccess : 'always',
-            wmode : 'opaque'
-        };
-        var flashvars = {};
-        var attributes = {
-            id : 'game_ring',
-            name : 'game_ring'
-        };
-        swfobject.embedSWF(mima, "a1", "100%", Height, "10.2.0",
-                "expressInstall.swf", flashvars, params, attributes);//这个swf是flash安装包
-                try{
-                  bPlayer.close();
-                }catch(e){}
-    }
-    this.AddSanFang = function(Cantent, Height, mima) {
-        // / <summary>
-        // / 暂时不支持的后缀名格式，提供下载
-        // / </summary>
-         $("#" + Cantent)
-         .html(
-         "<div class=\"jumbotron\"><center><a class=\"btn btn-info btn-lg\" href=\""
-         + mima + "\" target=\"_blank\" role=\"button\"><i class=\"glyphicon glyphicon-download\"></i> 点击下载</a></center></div>");
-         try{
-           bPlayer.close();
-         }catch(e){}
-    }
-    this.AddOffice = function(Cantent, Height, mima) {
-       // 设置外框架
-        $("#" + Cantent).height("auto");
-        // 设置课程列表
-        $("#kechengContent").css("top","2.2rem");
-        // / <summary>
-        // / 增加文档播放组件
-        // / </summary>
-         $("#" + Cantent).html("<iframe class=\"embed-responsive-item\" src='"
-         +  "/app/framework/pdf2/officeshow/web/viewer.html?file=" +
-          base64encode(encodeURI(mima)) + "'></iframe>");
-          try{
-            bPlayer.close();
-          }catch(e){}
-    }
+  }
+  if(mima == undefined || mima.length == 0 || mima == null){
+      $.toast('该小节缺少播放地址');
+      return false;
+  }
+  var houzhui = mima.substring(mima.lastIndexOf(".") + 1).toLowerCase(); // 获得主视频后缀名(转小写)
+  if (houzhui.indexOf("?") >= 0) {
+      houzhui = mima.substring(mima.lastIndexOf(".") + 1, mima
+              .lastIndexOf("?"));
+  }
+  if (houzhui == "htm" || houzhui == "html" || houzhui == "shtml") {
+      // 静态类内容
+      AddHtml(Cantent, Height, mima);
+  } else if (houzhui == "flv" || houzhui == "mp4" || houzhui == "f4v"
+          || houzhui == "m3u8" || houzhui == "webm" || houzhui == "ogg") {
+      // 网络视频类内容
+      AddVideo(Cantent, Height, mima);
+  } else if (houzhui == "pdf") {
+      AddOffice(Cantent, Height, mima);
+  } else if (houzhui == "doc" || houzhui == "docx" || houzhui == "xls"
+          || houzhui == "xlsx" || houzhui == "ppt" || houzhui == "pptx") {
+      $.toast("文档格式需要转成PDF格式");
 
-    var houzhui = mima.substring(mima.lastIndexOf(".") + 1).toLowerCase(); // 获得主视频后缀名(转小写)
-    if (houzhui.indexOf("?") >= 0) {
-        houzhui = mima.substring(mima.lastIndexOf(".") + 1, mima
-                .lastIndexOf("?"));
-    }
-    if (houzhui == "htm" || houzhui == "html" || houzhui == "shtml") {
-        // 静态类内容
-        AddHtml(Cantent, Height, mima);
-    } else if (houzhui == "flv" || houzhui == "mp4" || houzhui == "f4v"
-            || houzhui == "m3u8" || houzhui == "webm" || houzhui == "ogg") {
-        // 网络视频类内容
-        AddVideo(Cantent, Height, mima);
-    } else if (houzhui == "pdf") {
-        AddOffice(Cantent, Height, mima);
-    } else if (houzhui == "doc" || houzhui == "docx" || houzhui == "xls"
-            || houzhui == "xlsx" || houzhui == "ppt" || houzhui == "pptx") {
-        $.toast("文档格式需要转成PDF格式");
-
-        return false;
-    } else if (houzhui == "swf") {
-        // flash动画或播放器格式
-        ADDflash(Cantent, Height, mima);
-    } else if (houzhui == "jpg" || houzhui == "png" || houzhui == "gif") {
-        $("#" + Cantent)
-                .append(
-                        "<img src=\""
-                                + mima
-                                + "\" class=\"img-responsive\" alt=\"Responsive image\">");
-    } else {
-        // 其他乱七八糟视频格式
-        AddSanFang(Cantent, Height, mima);
-        return false;
-    }
+      return false;
+  } else if (houzhui == "swf") {
+      // flash动画或播放器格式
+      ADDflash(Cantent, Height, mima);
+  } else if (houzhui == "jpg" || houzhui == "png" || houzhui == "gif") {
+      $("#" + Cantent)
+              .append(
+                      "<img src=\""
+                              + mima
+                              + "\" class=\"img-responsive\" alt=\"Responsive image\">");
+  } else {
+      // 其他乱七八糟视频格式
+      AddSanFang(Cantent, Height, mima);
+      return false;
+  }
 }
 
 //封装百度播放器
@@ -1954,56 +1948,7 @@ try{
                       h: playerHeight,
                             },
                 });
-                /*****添加播放器的监听事件********/
-                bPlayer.addEventListener({name : ['all','click','playbackState']}, function(ret) {
-                  var EventType = eval(ret);
-                  console.log(EventType.eventType);
-                  if(EventType.eventType == "click"){
-                    if(Tstate == 1){ //当前正在播放
-                       bPlayer.pause();
-                       Tstate = 0;
-                       $.toast('已暂停播放，点击播放');
-                     }else {
-                       bPlayer.play();
-                       Tstate = 1;
-                     }
-                   }
-                   //快进
-                   if(EventType.eventType ==  "swipeRight"){
-                    BaiDuPlayer.BDforward();
-                   }
-                   //快退
-                   if(EventType.eventType ==  "swipeLeft"){
-                    BaiDuPlayer.BDrewind();
-                   }
-                   //减小音量
-                   if(EventType.eventType ==  "rightDown"){
-
-                   }
-                   // 增加音量
-                   if(EventType.eventType ==  "rightUp"){
-
-                   }
-                   // 增加亮度
-                   if(EventType.eventType ==  "leftUp"){
-                     var brightness = api.require('brightness2016');
-                     brightness.getBrightness(function(ret) {
-                       brightness.setBrightness({ brightness: eval(ret).brightness + 20 });
-                    });
-
-                   }
-                   // 降低亮度
-                   if(EventType.eventType ==  "leftDown"){
-                     var brightness = api.require('brightness2016');
-                     brightness.getBrightness(function(ret) {
-                        brightness.setBrightness({ brightness: eval(ret).brightness - 20 });
-                    });
-                   }
-                   //播放完成
-                   if(EventType.eventType == "complete"){
-                      BaiDuPlayer.BDPlayEnded();
-                   }
-                  });
+                BDPlayerLoader();
           }
     });
     bPlayer.stop();
@@ -2044,31 +1989,31 @@ try{
     }
   }
   //快速定位播放位置
-  this.BDtimego = function(times) {
+  window.BDtimego = function(times) {
     bPlayer.seek({
          currentPlaybackTime : times
     });
   }
   //设置播放器的播放速率：取值范围：[0.0, 4.0]，默认：1.0
-  this.BDsetplayRate = function (typeRate) {
+  window.BDsetplayRate = function (typeRate) {
     bPlayer.playbackRate({
          playbackRate : typeRate
     });
   }
   //快进  默认：2秒
-  this.BDforward = function () {
+  window.BDforward = function () {
     bPlayer.forward({
        seconds : 6.0
     });
   }
   //快退  默认：2秒
-  this.BDrewind = function () {
+  window.BDrewind = function () {
     bPlayer.rewind({
       seconds : 6.0
    });
   }
   //设置水印
-  this.BDsetWatermark = function () {
+  window.BDsetWatermark = function () {
     bPlayer.setWatermark({
          origin : {
                x : 10,
@@ -2198,15 +2143,19 @@ function mainplayerStop() {
 }
 
 //打开课程播放界面，将课程数据保存，已被下个界面使用
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 function openKe(stringjson,renwuid) {
     SetlocalStorage("PlayCourse", JSON.stringify(stringjson));
-    $.router.loadPage("../html/peixun/detail.html?arrangeId="+renwuid);
+    var dangqianUrl = window.location.href;
+    var lastH = dangqianUrl.substring(dangqianUrl.lastIndexOf('/') + 1, dangqianUrl.lastIndexOf('.'));
+    if(lastH != "home"){
+      $.router.loadPage("../../html/peixun/detail.html?arrangeId="+renwuid);
+    }else {
+      $.router.loadPage("../html/peixun/detail.html?arrangeId="+renwuid);
+    }
 }
 //从收藏  打开课程播放界面
 //需要获取  课程阶段 信息
 function openKe_collection(courseId,type,renwuid) {
-
      //请求获取对象
         getAjax(javaserver + "/stage/findCourseInfoByCourseId", { courseId: courseId}, function (data) {
             data = strToJson(data);
@@ -2897,68 +2846,13 @@ $(document).on('click','#ios-create',function(){
 //                               文件预览
 //**********************************************************************************
 $(document).on("pageInit", "#ziliao_yulan", function (e, id, $page) {
-
     $.showIndicator(); //loading
     //var upId = QueryString("upId")
     //getAjax(javaserver + "/Kapi/findfileById", { upId: upId }, function (data) {
     //    data = strToJson(data);
     //    if (data.errorcode == 0 && data.data != null) {
             //可转码文件
-      var data = {data:GetlocalStorage("fileobj")};
-			if (data.data.fileType==undefined){
-                data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1);
-            }
-            if (data.data.fileType == "pdf" || data.data.fileType == "docx" || data.data.fileType == "doc" || data.data.fileType == "xls" || data.data.fileType == "xlsx" || data.data.fileType == "ppt" || data.data.fileType == "pptx") {
-                $(".content_yulan").html("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
-            } else if (data.data.fileType == "txt") {
-                $(".content_yulan").html("<iframe src='" + data.data.filepreview + "' style='width:100%;border:0' ></iframe>");
-            } else if (data.data.fileType == "mp4") {
-                //$(".content_yulan").html("<video controls autoplay style='width:100%'><source src='" + data.data.filepreview + "'  type='video/mp4' ></video>  ");
-                //文件预览引入播放器
-                console.log("文件预览引入播放器");
-                bPlayer = api.require('bPlayer');  //实例化百度播放器
-                bPlayer.open({
-                      rect: {
-                          x: 0,
-                          y: 38,
-                          w: 0,
-                          h: 0,
-                      },
-                      path: data.data.filepreview,//mima.replace('\\', '/'),
-                      autoPlay: true
-                  }, function(ret, err) {
-                      if (ret) {
-                        //引入成功之后又重新对播放器的位置进行重定位，因为不知道为啥上面那个定位不起作用，所以没办法。。。
-                        bPlayer.setRect({
-                                  rect:{
-                                  x: 0,
-                                  y: 50,
-                                  w: winapi.winWidth,
-                                  h: 200,
-                                        },
-                            });
-                            /*****添加播放器的监听事件********/
-                            bPlayer.addEventListener({name : ['click']}, function(ret) {
-                              console.log(JSON.stringify(ret) + "||" + Tstate );
-                              //if(JSON.stringify(ret) == "click"){
-                                  if(Tstate == 1){ //当前正在播放
-                                     BaiDuPlayer.BDpause();
-                                     $.toast('已暂停播放，点击播放');
-                                   }else {
-                                     BaiDuPlayer.BDplay();
-                                   }
-                                 //}
-                              });
-                      }
-                });
-            } else if (data.data.fileType == "mp3") {
-                $(".content_yulan").html("<video controls autoplay style='width:100%'><source src='" + data.data.filepreview + "'  type='audio/mpeg' ></video>  ");
-            } else if (data.data.fileType == "jpg" || data.data.fileType == "png" || data.data.fileType == "gif" || data.data.fileType == "bmp" || data.data.fileType == "wbmp" || data.data.fileType == "jpeg"
-                                 || data.data.fileType == "JPEG" || data.data.fileType == "GIF" || data.data.fileType == "WBMP" || data.data.fileType == "PNG") {
-                $(".content_yulan").html(" <div ><img id='fileimg'  src='" + data.data.filepreview + "'   style='width:100%' /></div> ");
-            } else {
-                $(".content_yulan").html(" <div style='text-align: center;margin-top: 60%;color: #CCC;font-size: 20px;' >文件不支持预览！</div> ");
-            }
+      abc();
       //  }
     //});
     $.hideIndicator();
@@ -3419,7 +3313,7 @@ uploader.on('uploadProgress', function (file, percentage) {
 uploader.on('uploadSuccess', function (file) {
     var text = '已上传';
     if (file.pass) {
-        text = "文件妙传功能，文件已上传。"
+        text = "文件秒传功能，文件已上传。"
     }
     updataFile(file, 0);
     uploader.removeFile(file, true);
@@ -4431,7 +4325,7 @@ function getrenwuList(state,optype, pageIndex, pageSize){
                               center="<div class='item-after'><i class='iconfont icon-icon27' title='学习中' style='color:#39f'></i></div>";
                           }
                           //追加的任务列表
-                          renwu+="<li> <a href='../html/peixun/info.html?arrangeId="+data.datas[i].id+"'  target='_black' class='item-link item-content'> <div class='item-inner'><div class='item-title'>"+data.datas[i].name+"</div>"+center+" </div>  </a> </li>    ";
+                          renwu+="<li> <a href='../html/peixun/info.html?arrangeId="+data.datas[i].id+"' class='item-link item-content'> <div class='item-inner'><div class='item-title'>"+data.datas[i].name+"</div>"+center+" </div></a> </li>";
                       }
                       //给页面附上列表
                       if(optype==1){
@@ -4680,26 +4574,7 @@ function goto(url) {
     $.router.loadPage(url);
 }
 
-///***api相关事件以及各个控件的调用方法*************///
-//下拉刷新任务
-function FreshRW(nowState, pageIndex, pageSize){
-  //绑定下来刷新
-  // winapi.setCustomRefreshHeaderInfo({
-  //         bgColor: '#C0C0C0',
-  //         dropColor:'#9BA2AC',
-  //         refreshHeaderHeight:60, //下拉高度达到时触发刷新
-  //         image: FreshLoadimgImg
-  //    }, function() {
-  //      setTimeout(function () {
-  //               // 加载完毕需要重置
-  //               getrenwuList(nowState,1);
-  //               $.pullToRefreshDone('.renwu');
-  //               $.toast('刷新成功！');
-  //               console.log("刷新任务");
-  //               api.refreshHeaderLoadDone();
-  //        }, 1000);
-  // });
-}
+
 //获取手机当前的网络状态
 function GetConnectionType(){
   var connectionT = winapi.connectionType;
@@ -4710,5 +4585,149 @@ function GetConnectionType(){
 //打开文件预览
 function openfile(stringjson) {
     SetlocalStorage("fileobj", JSON.stringify(stringjson));
-    $.router.loadPage("../html/wenjian/yulan.html");
+    var dangqianUrl = window.location.href;
+    var lastH = dangqianUrl.substring(dangqianUrl.lastIndexOf('/') + 1, dangqianUrl.lastIndexOf('.'));
+    console.log(lastH);
+    if(lastH != "home"){
+      $.router.loadPage("../../html/wenjian/yulan.html");
+    }else {
+      $.router.loadPage("wenjian/yulan.html");
+    }
+}
+function openfile1(path) {
+  bPlayer = api.require('bPlayer');  //实例化百度播放器
+  bPlayer.open({
+        rect: {
+            x: 0,
+            y: 38,
+            w: 0,
+            h: 0,
+        },
+        path: path,//mima.replace('\\', '/'),
+        autoPlay: true
+    }, function(ret, err) {
+        if (ret) {
+          bPlayer.full();
+          bPlayer.addEventListener({name : ['all','click','playbackState']}, function(ret) {
+            var EventType = eval(ret);
+            if(EventType.eventType == "click"){
+              bPlayer.close();
+             }
+           });
+        }
+  });
+}
+/*****添加播放器的监听事件********/
+function BDPlayerLoader(){
+  try {
+    bPlayer.addEventListener({name : ['all','click','playbackState']}, function(ret) {
+      var EventType = eval(ret);
+      if(EventType.eventType == "click"){
+        if(Tstate == 1){ //当前正在播放
+           bPlayer.pause();
+           Tstate = 0;
+           $.toast('已暂停播放，点击播放');
+         }else {
+           bPlayer.play();
+           Tstate = 1;
+         }
+       }
+       //快进
+       if(EventType.eventType ==  "swipeRight"){
+        BaiDuPlayer.BDforward();
+       }
+       //快退
+       if(EventType.eventType ==  "swipeLeft"){
+        BaiDuPlayer.BDrewind();
+       }
+       //减小音量
+       if(EventType.eventType ==  "rightDown"){
+
+       }
+       // 增加音量
+       if(EventType.eventType ==  "rightUp"){
+
+       }
+       // 增加亮度
+       if(EventType.eventType ==  "leftUp"){
+         var brightness = api.require('brightness2016');
+         brightness.getBrightness(function(ret) {
+           brightness.setBrightness({ brightness: eval(ret).brightness + 20 });
+        });
+
+       }
+       // 降低亮度
+       if(EventType.eventType ==  "leftDown"){
+         var brightness = api.require('brightness2016');
+         brightness.getBrightness(function(ret) {
+            brightness.setBrightness({ brightness: eval(ret).brightness - 20 });
+        });
+       }
+       //播放完成
+       if(EventType.eventType == "complete"){
+          BaiDuPlayer.BDPlayEnded();
+       }
+      });
+  } catch (e) {
+
+  } finally {
+
+  }
+}
+function abc(){
+  var data = {data:GetlocalStorage("fileobj")};
+  console.log(data);
+  if (data.data.fileType==undefined){
+            data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1);
+        }
+        if (data.data.fileType == "pdf" || data.data.fileType == "docx" || data.data.fileType == "doc" || data.data.fileType == "xls" || data.data.fileType == "xlsx" || data.data.fileType == "ppt" || data.data.fileType == "pptx") {
+            $(".content_yulan").html("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
+        } else if (data.data.fileType == "txt") {
+            $(".content_yulan").html("<iframe src='" + data.data.filepreview + "' style='width:100%;border:0' ></iframe>");
+        } else if (data.data.fileType == "mp4") {
+            //$(".content_yulan").html("<video controls autoplay style='width:100%'><source src='" + data.data.filepreview + "'  type='video/mp4' ></video>  ");
+            //文件预览引入播放器
+            console.log("文件预览引入播放器");
+            bPlayer = api.require('bPlayer');  //实例化百度播放器
+            bPlayer.open({
+                  rect: {
+                      x: 0,
+                      y: 38,
+                      w: 0,
+                      h: 0,
+                  },
+                  path: data.data.filepreview,//mima.replace('\\', '/'),
+                  autoPlay: true
+              }, function(ret, err) {
+                  if (ret) {
+                    bPlayer.setRect({
+                              rect:{
+                              x: 0,
+                              y: 50,
+                              w: winapi.winWidth,
+                              h: 200,
+                                    },
+                        });
+                        /*****添加播放器的监听事件********/
+                        BDPlayerLoader();
+                  }
+            });
+        } else if (data.data.fileType == "mp3") {
+            $(".content_yulan").html("<video controls autoplay style='width:100%'><source src='" + data.data.filepreview + "'  type='audio/mpeg' ></video>  ");
+        } else if (data.data.fileType == "jpg" || data.data.fileType == "png" || data.data.fileType == "gif" || data.data.fileType == "bmp" || data.data.fileType == "wbmp" || data.data.fileType == "jpeg"
+                             || data.data.fileType == "JPEG" || data.data.fileType == "GIF" || data.data.fileType == "WBMP" || data.data.fileType == "PNG") {
+            $(".content_yulan").html(" <div ><img id='fileimg'  src='" + data.data.filepreview + "'   style='width:100%' /></div> ");
+        } else {
+            $(".content_yulan").html(" <div style='text-align: center;margin-top: 60%;color: #CCC;font-size: 20px;' >文件不支持预览！</div> ");
+        }
+}
+function CloseBaiDuplayer(){
+try {
+  console.log("干掉播放器，你就是王者，凸(艹皿艹 )");
+  bPlayer.close();
+} catch (e) {
+console.log(e);
+} finally {
+
+}
 }
