@@ -237,6 +237,7 @@
         </div>
 
  </div>
+
  <div class="list-block list navul" style="margin: 1rem auto;">
         <ul>
          <li><a class="item-content item-link" href="geren/info.html">
@@ -262,6 +263,12 @@
               <div class="item-title">收藏课程</div>
             </div>
           </a></li>
+          <li><a class="item-content item-link" onclick="openDownManager()">
+                  <div class="item-media"><i class="icon iconfont icon-xiazai"></i></div>
+                 <div class="item-inner">
+                   <div class="item-title" >离线缓存</div>
+                 </div>
+           </a></li>
            <li class="yejianmoshi">
                 <div class="item-content">
                    <div class="item-media"><i class="icon iconfont icon-banyuanxuankuang"></i></div>
@@ -544,10 +551,59 @@
 <!-- <script type="text/javascript" src="../script/mainscript1.0.js"></script> -->
 <script type="text/javascript">
 var winapi = {};
+var downloadManager;//下载插件对象
 apiready = function(){
   winapi = api;
+  downloadManager = api.require('downloadManager');
   var locationHref = window.location.toString();
 };
+
+//打开离线缓存列表
+function openDownManager(){
+  downloadManager.openManagerView({
+      title: '离线缓存'
+  }, function(ret, err) {
+      if (ret) {
+          //打开预览文件
+          downloadManager.closeManagerView();//关闭窗口
+          //var jieguo =JSON.stringify(ret);
+          if(ret.hasOwnProperty('event'))//关闭窗口时
+          {
+             //$.toast('关闭窗口时');
+
+          }
+          else
+          {
+              //打开文件时候触发
+              console.log(ret);
+              var fileobj = {};
+              fileobj.upId = ret.id;
+              fileobj.fileType =undefined;//ret.mimeType;文件后缀名，传空，自动截取
+              fileobj.filepreview =  ret.savePath; //预览地址
+
+              openfile(fileobj);
+
+          }
+      } else {
+          //alert();
+          $.toast('正在打开');
+      }
+  });
+}
+//下载文件
+//downfile({url: 'http://app.newstartsoft.com/live/tks_v1.mp4',savePath: 'cacheDir://xxx.mp4',iconPath:'http://www.newstartsoft.com/Content/New/img/video_bj.jpg',cache: true,allowResume: true,title: '教程',networkTypes: 'all'})
+function downfile(fileobj){
+downloadManager.enqueue(fileobj, function(ret, err) {
+    if (ret) {
+        //aaa
+        $.toast('开始下载');
+        console.log(JSON.stringify(ret));
+    } else {
+        //JSON.stringify(err)
+        $.toast('下载错误'+err);
+    }
+});
+}
 
 </script>
 <script type='text/javascript' src="../res/jisupeixun.js"></script>

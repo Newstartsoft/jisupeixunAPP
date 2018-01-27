@@ -15,7 +15,7 @@ var allorgname="";
 var allgroupname="";
 var allrolename="";
 var FreshLoadimgImg = "{pull: ['fs://wgt/images/loading_more.gif'],load: ['fs://wgt/images/loading_more.gif']}";
-
+var playerHeight = 200;
 //手机判断
 var browser = {
     versions: function () {
@@ -35,7 +35,6 @@ var browser = {
             webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
         };
     } (),
-
     language: (navigator.browserLanguage || navigator.language).toLowerCase()
 }
 
@@ -43,6 +42,7 @@ try{$.noConflict();}catch(e){}
 $(document).on("pageInit", function(e, id, $page) {
   try{
     bPlayer.close();  //此处主要是为了防止视频还在后台播放，所以此处加上关闭
+    //GetConnectionType();
   }catch(e){ }
     //企业微信隐藏header属性
     if(isWeiXin()){
@@ -86,7 +86,6 @@ $(document).on("pageInit", function(e, id, $page) {
         }else{
             $(".title").html("资料");
         }
-
         $(".tab-item").removeClass("active");
         $(myhash+"_m").addClass("active");
         ziliaoinit();
@@ -118,7 +117,6 @@ $(document).on("pageInit", function(e, id, $page) {
         }else{
             $(".title").html("个人中心");
         }
-        ProhibitFresh();
    //刷新后在公开课
    }else if(myhash == "#course" || id == "course"){
         if(isWeiXin()){
@@ -128,7 +126,6 @@ $(document).on("pageInit", function(e, id, $page) {
         }
         getPublicCourse(true);
         $("#xuexi_m").addClass("active");
-        ProhibitFresh();
     //刷新后在首页
    }else if(myhash == "#xuexi" || id == "xuexi"){
         if(isWeiXin()){
@@ -137,7 +134,6 @@ $(document).on("pageInit", function(e, id, $page) {
             $(".title").html("首页");
         }
         $("#xuexi_m").addClass("active");
-        ProhibitFresh();
    }
 });
 
@@ -275,14 +271,17 @@ $(window).on('popstate', function () {
 //登录界面
 //**********************************************************************
 $(document).on("pageInit", "#login", function (e, id, $page) {
-  console.log("IOS123");
     sysUserInfo=strToJson(GetlocalStorage("userinfo"));
     var t=GetlocalStorage("userinfo_token");
     var token = strToJson(GetlocalStorage("userinfo_token"));
-
     if(sysUserInfo!=null&&sysUserInfo!=""&&sysUserInfo!=undefined&&token!=null&&token!=""&&token!=undefined){
          //登录(*防止学员用户已更换组织架构，缓存数据不对)
-        login(sysUserInfo.user_Account,sysUserInfo.user_Pwd)
+        //login(sysUserInfo.user_Account,sysUserInfo.user_Pwd);
+        getParam();
+        $("#username").val(sysUserInfo.user_Account);
+        $("#userpwd").val(sysUserInfo.user_Pwd);
+        document.title = sysUserInfo.organization_Name;
+        window.location.href = "html/home.html#xuexi";
     }
     //登录按钮
     $(document).on('click', '#login_btn', function () {
@@ -291,7 +290,6 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
 
         //登录
         login(useraccount,userpwd)
-
     });
     var isPlayer = false;
      function login(username,pwd){
@@ -326,7 +324,6 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                 error_login(users.errormsg)
                 //$.alert(users.errormsg);
             } else if (users.errorcode == "12") {
-
                 if (users.errnum <= 1) {
                     //验证帐号是否存在、
                     getAjax(javaserver + "/ApiUser/isAccount", { useraccount: username }, function (retData) {
@@ -371,22 +368,9 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                             retobj.data.allrolename = allrolename;
                             //放入缓存
                             SetlocalStorage("userinfo", JSON.stringify(retobj.data));
-
                             document.title = sysUserInfo.organization_Name;
-                            // api.openFrame({
-                            //           name: 'home#xuexi',
-                            //           url: 'html/home.html#xuexi',
-                            //           bounces: false,
-                            //           rect: {
-                            //               x: 0,
-                            //               y: 0,
-                            //               w: 'auto',
-                            //               h: 'auto'
-                            //           }
-                            //   });
                             window.location.href = "html/home.html#xuexi";
                     });
-
                 } else if (users.data.userstate == "1") {
                      error_login("帐号已冻结");
                     //console.log("帐号已冻结！");
@@ -739,7 +723,7 @@ $(document).on("pageInit", "#renwu_info", function (e, id, $page) {
         $.showIndicator(); //loading
         $.router.back("/app/peixun/info.html?arrangeId="+QueryString("arrangeId"));
         //关闭播放器
-        bPlayer.close();
+        try{bPlayer.close();}catch(e){}
         //$(".title").html("任务");
     }
     //打开试卷
@@ -817,7 +801,7 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
     newStudyDetailsJson={timeStart:"",timeEnd:"",cousreid:"",csid:"",sectionName:"",courseType:"",dateLearn:""};
     newStudyDetailsJson.timeStart=new Date().format("yyyy-MM-dd hh:mm:ss");
     newStudyDetailsJson.dateLearn=newStudyDetailsJson.timeStart;
-
+    playerHeight = $("#kecheng_play_mian_top_play").height();
     //浏览器刷新
     window.onbeforeunload =function(){
         tongbu("aaa",true);
@@ -922,22 +906,27 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                     csobj.fileTxt = jisuEncode(csobj.fileTxt);
                     csobj.CSTITLE = jisuEncode(csobj.CSTITLE);
                }
-               //.replace(/<\/?[^>]*>/g,'')
+               //拼接下载按钮
+               var xiazaihtml = "";
+               if(csobj.stypename == "视频"){
+                  var chapterobj = csobj.chapterJson;
+                  console.log(chapterobj);
+                  if(chapterobj.fileType != "m3u8"){
+                    xiazaihtml = "<i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj.filepreview+"',savePath: 'cacheDir://"+csobj.CSFILEID + "/" + chapterobj.fileName +"',iconPath:'"+chapterobj.filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i>";
+                  }
+               }
                zjhtml+= "<li class=\"item-content\" id='kecheng_"+csobj.CSID+"' onClick='bofang("+JSON.stringify(csobj)+")'><div class=\"item-inner\"><div class=\"item-title\" style=\"min-width:75%;\">"+csobj.CSNAME.replace(/<\/?[^>]*>/g,'')+"</div>";
                if(csobj.CSTYPE == "1" ||csobj.CSTYPE == 1 || csobj.CSTYPE == "2" || csobj.CSTYPE == 2)
                {
-                    zjhtml += "<div style=\"font-size:0.5rem;\"><span id='kecheng_"+ csobj.CSID +"_learnTime'>0</span>/<span id='kecheng_"+ csobj.CSID +"_cstime'>"+  csobj.CSTIME+":00</span> </div>";
+                 zjhtml += "<div style=\"font-size:0.5rem;\"><span id='kecheng_"+ csobj.CSID +"_learnTime'>0</span>/<span id='kecheng_"+ csobj.CSID +"_cstime'>"+  csobj.CSTIME+":00</span> </div>";
                }
-               zjhtml += "<div class=\"item-after\"></div></div></li>";
-               //if(j == 0)
-               //zjhtml += "<script type=\"text/javascript\">bofang("+JSON.stringify(csobj)+") </script>";
+               zjhtml += "<div class=\"item-after\"></div></div>"+xiazaihtml+"</li>";
             }
         }
         else{
             zjhtml +="暂未设置课程";
         }
         zjhtml += "</ul></div>";
-       // console.log(detailedJSON[i]);
     }
     $("#kechengmingxi").html(zjhtml);
     if(PlayCourse.courseDetailed ==""){
@@ -1068,42 +1057,7 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                         $.toast('课程还未增加内容哦！');
                     }
         }
-        /******引入播放器*******/
-        bPlayer = api.require('bPlayer');  //实例化百度播放器
-        bPlayer.open({
-              rect: {
-                  x: 0,
-                  y: 38,
-                  w: 0,
-                  h: 0,
-              },
-              path: '',//mima.replace('\\', '/'),
-              autoPlay: true
-          }, function(ret, err) {
-              if (ret) {
-                //引入成功之后又重新对播放器的位置进行重定位，因为不知道为啥上面那个定位不起作用，所以没办法。。。
-                bPlayer.setRect({
-                          rect:{
-                          x: 0,
-                          y: 38,
-                          w: winapi.winWidth,
-                          h: 200,
-                                },
-                    });
-                    /*****添加播放器的监听事件********/
-                    bPlayer.addEventListener({name : ['click']}, function(ret) {
-                      console.log(JSON.stringify(ret) + "||" + Tstate );
-                      //if(JSON.stringify(ret) == "click"){
-                          if(Tstate == 1){ //当前正在播放
-                             BaiDuPlayer.BDpause();
-                             $.toast('已暂停播放，点击播放');
-                           }else {
-                             BaiDuPlayer.BDplay();
-                           }
-                         //}
-                      });
-              }
-        });
+
 });
 //播放不同清晰度的视频
 function switchVideo(okayUrl,title){
@@ -1948,7 +1902,110 @@ var mainplayer = function(Cantent, Height, mima) {
 var BaiDuPlayer = new function(){
 try{
   //播放
+
   this.play = function (Cantent, Height, mima){
+    bPlayer = api.require('bPlayer');  //实例化百度播放器
+    var systemType = api.systemType;
+    if(systemType == 'ios'){
+      bPlayer.open({
+            rect: {
+                x: 0,
+                y: 38,
+                w: winapi.winWidth,
+                h: playerHeight,
+            },
+            path: mima.replace('\\', '/'),
+            autoPlay: true
+        }, function(ret, err) {
+            if (ret) {
+              bPlayer.full();
+            }
+      });
+      bPlayer.addEventListener({name : ['all','click', 'playbackState']}, function(ret) {
+        console.log(JSON.stringify(ret) + "||" + Tstate );
+        if(JSON.stringify(ret) == "click"){
+            if(Tstate == 1){ //当前正在播放
+               BaiDuPlayer.BDpause();
+               $.toast('已暂停播放，点击播放');
+             }else {
+               BaiDuPlayer.BDplay();
+             }
+           }
+        });
+    }else {
+    bPlayer.open({
+          rect: {
+              x: 0,
+              y: 38,
+              w: 0,
+              h: 0,
+          },
+          path: '',//mima.replace('\\', '/'),
+          autoPlay: true
+      }, function(ret, err) {
+          if (ret) {
+
+            //引入成功之后又重新对播放器的位置进行重定位，因为不知道为啥上面那个定位不起作用，所以没办法。。。
+            bPlayer.setRect({
+                      rect:{
+                      x: 0,
+                      y: 38,
+                      w: winapi.winWidth,
+                      h: playerHeight,
+                            },
+                });
+                /*****添加播放器的监听事件********/
+                bPlayer.addEventListener({name : ['all','click','playbackState']}, function(ret) {
+                  var EventType = eval(ret);
+                  console.log(EventType.eventType);
+                  if(EventType.eventType == "click"){
+                    if(Tstate == 1){ //当前正在播放
+                       bPlayer.pause();
+                       Tstate = 0;
+                       $.toast('已暂停播放，点击播放');
+                     }else {
+                       bPlayer.play();
+                       Tstate = 1;
+                     }
+                   }
+                   //快进
+                   if(EventType.eventType ==  "swipeRight"){
+                    BaiDuPlayer.BDforward();
+                   }
+                   //快退
+                   if(EventType.eventType ==  "swipeLeft"){
+                    BaiDuPlayer.BDrewind();
+                   }
+                   //减小音量
+                   if(EventType.eventType ==  "rightDown"){
+
+                   }
+                   // 增加音量
+                   if(EventType.eventType ==  "rightUp"){
+
+                   }
+                   // 增加亮度
+                   if(EventType.eventType ==  "leftUp"){
+                     var brightness = api.require('brightness2016');
+                     brightness.getBrightness(function(ret) {
+                       brightness.setBrightness({ brightness: eval(ret).brightness + 20 });
+                    });
+
+                   }
+                   // 降低亮度
+                   if(EventType.eventType ==  "leftDown"){
+                     var brightness = api.require('brightness2016');
+                     brightness.getBrightness(function(ret) {
+                        brightness.setBrightness({ brightness: eval(ret).brightness - 20 });
+                    });
+                   }
+                   //播放完成
+                   if(EventType.eventType == "complete"){
+                      BaiDuPlayer.BDPlayEnded();
+                   }
+                  });
+          }
+    });
     bPlayer.stop();
     bPlayer.reset();
     setTimeout(function () {
@@ -1960,8 +2017,11 @@ try{
             }
       });
     }, 3000);
+    }
+}
+  this.BDPlayEnded() = function(){
+    mainplayerStop();
   }
-
   //用于暂停后的播放或者是非自动播放，点击播放事件
   this.BDplay = function  () {
     bPlayer.play();
@@ -2210,8 +2270,6 @@ function ziliaoinit() {
     sysUserInfo=getUserInfo();
     getfilelist(0,'','','',2,pageSize,pageIndex,true);
     $.hideIndicator();//隐藏loading
-    //刷新
-    FreshZSK(intoOrg, fid, pageSize);
 
    //文件名称筛选
         $('#searchFileName').keypress(function (e) { //这里给function一个事件参数命名为e，叫event也行，随意的，e就是IE窗口发生的事件。
@@ -2659,7 +2717,7 @@ $(document).on('infinite', '#orgfile',function() {
 
                         //预览
                     } else {
-                        block += "<li ><label class='label-checkbox item-content'><div class='item-media' onclick='goto(../html/wenjian/yulan.html?upId=" + data.datas[i].upId + ")'><img src='../res/fileicon/" + data.datas[i].fileType + "_56.png'  onerror='javascript:this.src=\"../res/fileicon/qita_56.png\"'/></div><div class='item-inner'><div class='item-title'><a href='../html/wenjian/yulan.html?upId=" + data.datas[i].upId + "' class='item-link'>" + data.datas[i].fileName + "</a></div></div></label></li>";
+                        block += "<li ><label class='label-checkbox item-content'><div class='item-media' onclick='openfile(" + JSON.stringify(data.datas[i]) + ")'><img src='../res/fileicon/" + data.datas[i].fileType + "_56.png'  onerror='javascript:this.src=\"../res/fileicon/qita_56.png\"'/></div><div class='item-inner'><div class='item-title'><a onclick='openfile(" + JSON.stringify(data.datas[i]) + ")' class='item-link'>" + data.datas[i].fileName + "</a></div></div></label></li>";
                     }
                 }
                 if (optype == 1) {
@@ -2741,7 +2799,7 @@ $(document).on('infinite', '#orgfile',function() {
 //**********************************************************************************
 //                                                          搜索文件名称
 //**********************************************************************************
-//$(document).on("pageInit", "#ziliao_so", function(e, id, $page) {
+//$(document).on("", "#ziliao_so", function(e, id, $page) {
 
 //    var pageSize=10;
 //    var pageIndex=1;
@@ -2841,11 +2899,12 @@ $(document).on('click','#ios-create',function(){
 $(document).on("pageInit", "#ziliao_yulan", function (e, id, $page) {
 
     $.showIndicator(); //loading
-    var upId = QueryString("upId")
-    getAjax(javaserver + "/Kapi/findfileById", { upId: upId }, function (data) {
-        data = strToJson(data);
-        if (data.errorcode == 0 && data.data != null) {
+    //var upId = QueryString("upId")
+    //getAjax(javaserver + "/Kapi/findfileById", { upId: upId }, function (data) {
+    //    data = strToJson(data);
+    //    if (data.errorcode == 0 && data.data != null) {
             //可转码文件
+      var data = {data:GetlocalStorage("fileobj")};
 			if (data.data.fileType==undefined){
                 data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1);
             }
@@ -2856,6 +2915,7 @@ $(document).on("pageInit", "#ziliao_yulan", function (e, id, $page) {
             } else if (data.data.fileType == "mp4") {
                 //$(".content_yulan").html("<video controls autoplay style='width:100%'><source src='" + data.data.filepreview + "'  type='video/mp4' ></video>  ");
                 //文件预览引入播放器
+                console.log("文件预览引入播放器");
                 bPlayer = api.require('bPlayer');  //实例化百度播放器
                 bPlayer.open({
                       rect: {
@@ -2872,7 +2932,7 @@ $(document).on("pageInit", "#ziliao_yulan", function (e, id, $page) {
                         bPlayer.setRect({
                                   rect:{
                                   x: 0,
-                                  y: 38,
+                                  y: 50,
                                   w: winapi.winWidth,
                                   h: 200,
                                         },
@@ -2899,9 +2959,10 @@ $(document).on("pageInit", "#ziliao_yulan", function (e, id, $page) {
             } else {
                 $(".content_yulan").html(" <div style='text-align: center;margin-top: 60%;color: #CCC;font-size: 20px;' >文件不支持预览！</div> ");
             }
-        }
-    });
+      //  }
+    //});
     $.hideIndicator();
+
 });
 
 
@@ -4322,7 +4383,7 @@ function getAjax(url, parm, callBack, callBackError, callBackType, mode,istongbu
               // $.alert(err);
               console.log('请求服务器错误！');
               pedding=false;
-              console.error("服务器访问异常：" + err.readyState + "||当前请求地址：" + url+"?"+ parm );
+              console.error("服务器访问异常：" + err.readyState);
           }
       });
 
@@ -4470,7 +4531,7 @@ function getrenwuList(state,optype, pageIndex, pageSize){
                         block += "<li ><label class='label-checkbox item-content'><div class='item-media' ><img src='../res/fileicon/" + data.datas[i].fileType + "_56.png'  onerror='javascript:this.src=\"../res/fileicon/qita_56.png\"'/></div><div class='item-inner'><div class='item-title'><a href='#' class='item-link' data=" + data.datas[i].upId + " other=" + data.datas[i].fileType + " fpath=" + dataFpath + " fid=" + data.datas[i].fid + ">" + data.datas[i].fileName + "</a></div><input type='checkbox' name='my-radio' value='" + data.datas[i].upId + "'><div class='item-media'><i class='icon icon-form-checkbox'></i></div></div></label></li>";
                         //预览
                     } else {
-                        block += "<li ><label class='label-checkbox item-content'><div class='item-media' onclick=goto('../html/wenjian/yulan.html?upId=" + data.datas[i].upId + "')><img src='../res/fileicon/" + data.datas[i].fileType + "_56.png'  onerror='javascript:this.src=\"../res/fileicon/qita_56.png\"'/></div><div class='item-inner'><div class='item-title'><a href='../html/wenjian/yulan.html?upId=" + data.datas[i].upId + "' class='item-link'>" + data.datas[i].fileName + "</a></div><input type='checkbox' name='my-radio' value='" + data.datas[i].upId + "'><div class='item-media'><i class='icon icon-form-checkbox'></i></div></div></label></li>";
+                        block += "<li ><label class='label-checkbox item-content'><div class='item-media' onclick='openfile(" + JSON.stringify(data.datas[i]) + ")'><img src='../res/fileicon/" + data.datas[i].fileType + "_56.png'  onerror='javascript:this.src=\"../res/fileicon/qita_56.png\"'/></div><div class='item-inner'><div class='item-title'><a onclick='openfile(" + JSON.stringify(data.datas[i]) + ")' class='item-link'>" + data.datas[i].fileName + "</a></div><input type='checkbox' name='my-radio' value='" + data.datas[i].upId + "'><div class='item-media'><i class='icon icon-form-checkbox'></i></div></div></label></li>";
                     }
                 }
                 //追加html   （分页）
@@ -4639,49 +4700,15 @@ function FreshRW(nowState, pageIndex, pageSize){
   //        }, 1000);
   // });
 }
-//刷新知识库
-function FreshZSK(intoOrg, fid, pageSize){
-  //绑定下来刷新
-  // winapi.setCustomRefreshHeaderInfo({
-  //         bgColor: '#C0C0C0',
-  //         dropColor:'#9BA2AC',
-  //         refreshHeaderHeight:100, //下拉高度达到时触发刷新
-  //         image:FreshLoadimgImg
-  //    }, function() {
-  //      setTimeout(function() {
-  //      //在企业列表里
-  //      if(intoOrg){
-  //          if(fid=="main"){
-  //              getorglist(2,"");
-  //          }else{
-  //              getorglist(2,fid);
-  //          }
-  //      //普通查询
-  //      }else{
-  //        if(fid=="main")fid=0;
-  //        if(fid==0||fid==""||fid==undefined||fid=="0"){
-  //          getfilelist(fid,"","","",2,pageSize,1,true);
-  //        }else{
-  //          getfilelist(fid,"","","",2,pageSize,1);
-  //        }
-  //      }
-  //       $.toast('刷新成功！');
-  //       console.log("刷新知识库" + intoOrg+fid+pageSize);
-  //        $.pullToRefreshDone('.ziliao');
-  //        api.refreshHeaderLoadDone();
-  //     }, 1000);
-  // });
-  //在企业列表里
-
+//获取手机当前的网络状态
+function GetConnectionType(){
+  var connectionT = winapi.connectionType;
+  if(connectionT == "none"){  //无网络链接
+    $.toast('当前网络不可用，请检查网络设置！');
+  }
 }
-
-function ProhibitFresh(){
-  // try {
-  //   console.log("禁止下拉刷新");
-  //   winapi.refreshHeaderLoadDone();
-  // } catch (e) {
-  //   console.log(e.toString());
-  // } finally {
-  //
-  // }
+//打开文件预览
+function openfile(stringjson) {
+    SetlocalStorage("fileobj", JSON.stringify(stringjson));
+    $.router.loadPage("../html/wenjian/yulan.html");
 }

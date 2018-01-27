@@ -17,7 +17,6 @@
 	<preference name="autoUpdate" value="true" />
 	<preference name="smartUpdate" value="false" />
 	<preference name="debug" value="false"/>  <!--配置状态栏和页面是否重合（沉浸式效果）-->  <preference name="statusBarAppearance" value="false"/>
-	<preference name="statusBarAppearance" value="true"/>
 	<permission name="readPhoneState" />
 	<permission name="camera" />
 	<permission name="record" />
