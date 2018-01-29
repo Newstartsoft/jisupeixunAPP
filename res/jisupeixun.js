@@ -4675,9 +4675,11 @@ function BDPlayerLoader(){
   }
 }
 function abc(){
+  console.log(GetlocalStorage("fileobj"));
   var data = {data:GetlocalStorage("fileobj")};
   console.log(data);
-  if (data.data.fileType==undefined){
+  if (data.errorcode == 0 && data.data != null) {
+        if (data.data.fileType==undefined){
             data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1);
         }
         if (data.data.fileType == "pdf" || data.data.fileType == "docx" || data.data.fileType == "doc" || data.data.fileType == "xls" || data.data.fileType == "xlsx" || data.data.fileType == "ppt" || data.data.fileType == "pptx") {
@@ -4720,6 +4722,7 @@ function abc(){
         } else {
             $(".content_yulan").html(" <div style='text-align: center;margin-top: 60%;color: #CCC;font-size: 20px;' >文件不支持预览！</div> ");
         }
+    }
 }
 function CloseBaiDuplayer(){
 try {
