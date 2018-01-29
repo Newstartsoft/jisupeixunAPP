@@ -40,8 +40,7 @@ function openTi(obj){
     //window.location.href =domain+"/member/index.html#/home/stuquelist/"+obj.knowledge_Id+"/"+arrangeId+"&arrangeId="+arrangeId+"&passtype="+obj.know_select_que_type+"&pass="+obj.know_select_que_num+"&typeId=0&knowledgeName="+obj.knowledge_Name;
     //:xid/:knowledgeId/:passtype/:pass/:typeId/:knowledgeName/:arrangeId/:userId
     sysoUserInfo = getUserInfo();
-    console.log(domain+"/member/index.html#/home/stuquelist/"+arrangeId+"/"+obj.knowledge_Id+"/"+obj.know_select_que_type+"/"+obj.know_select_que_num+"/0/"+obj.knowledge_Name+"/"+arrangeId+"/"+obj.knowledge_Id+"/"+obj.knowledge_Name+"/0/"+sysoUserInfo.user_ID+"/0/phone?a=" + sysoUserInfo.user_ID);
-    window.location.href =domain+"/member/index.html#/home/stuquelist/"+arrangeId+"/"+obj.knowledge_Id+"/"+obj.know_select_que_type+"/"+obj.know_select_que_num+"/0/"+obj.knowledge_Name+"/"+arrangeId+"/"+obj.knowledge_Id+"/"+obj.knowledge_Name+"/0/"+sysoUserInfo.user_ID+"/0/phone";
+    window.location.href =domain+"/member/index.html#/home/stuquelist/"+arrangeId+"/"+obj.knowledge_Id+"/"+obj.know_select_que_type+"/"+obj.know_select_que_num+"/0/"+obj.knowledge_Name+"/"+arrangeId+"/"+obj.knowledge_Id+"/"+obj.knowledge_Name+"/0/"+sysoUserInfo.user_ID+"/0/phone?a=" + sysoUserInfo.user_ID;
 }
 //获得随机卷的地址
 function getPaperUrl(paperUrl,coun){
