@@ -148,10 +148,14 @@
 
      <!--界面标题-->
   <header class="bar bar-nav">
-           <a  id="zhiliaoback"><i class="iconfont icon-shangyiye2"></i></a>
+          <a class="icon pull-left" id="zhiliaoback" style="display:none;"><i class="iconfont icon-shangyiye2"></i></a>
           <a class="icon iconfont icon-jia pull-left create-actions" id="zhiliaoadd"></a>
-          <span class="icon iconfont pull-right" id="zhiliaoshuaxin"><i class="iconfont icon-shuaxin3" style="font-size:18px;"></i></span>
+          <span class="icon iconfont pull-right" id="zhiliaoshuaxin"><i class="iconfont icon-shuaxin3"></i></span>
           <a class="icon iconfont icon-jia pull-right ios-is-show " id="ios-create"></a>
+
+
+
+
           <h1 class="title">资料</h1>
     </header>
 
@@ -249,6 +253,18 @@
         </ul>
       </div>
 
+    <div class="list-block list navul" style="margin: 1rem auto;">
+           <ul>
+             <li><a class="item-content item-link" onclick="openDownManager()">
+                <div class="item-media"><i class="icon iconfont icon-xiazai"></i></div>
+                <div class="item-inner">
+                  <div class="item-title">离线缓存</div>
+                </div>
+              </a></li>
+           </ul>
+         </div>
+
+
 <div class="list-block list navul" style="margin: 1rem auto;">
         <ul>
         <li><a class="item-content item-link" href="geren/lishi.html#history">
@@ -263,12 +279,6 @@
               <div class="item-title">收藏课程</div>
             </div>
           </a></li>
-          <li><a class="item-content item-link" onclick="openDownManager()">
-                  <div class="item-media"><i class="icon iconfont icon-xiazai"></i></div>
-                 <div class="item-inner">
-                   <div class="item-title" >离线缓存</div>
-                 </div>
-           </a></li>
            <li class="yejianmoshi">
                 <div class="item-content">
                    <div class="item-media"><i class="icon iconfont icon-banyuanxuankuang"></i></div>
@@ -567,7 +577,6 @@ function openDownManager(){
   downloadManager.openManagerView({
       title: '离线缓存'
   }, function(ret, err) {
-    console.log(ret);
       if (ret) {
           //打开预览文件
           downloadManager.closeManagerView();//关闭窗口

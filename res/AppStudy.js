@@ -1495,3 +1495,13 @@ function chapterZK() {
          $('#kechengContent').scrollTop(dqqh);
     }
 }
+//预览页面，文件缓存
+function huancunxiazai() {
+  var data = {data:GetlocalStorage("fileobj")};
+  if (data.data != null) {
+   console.log(JSON.stringify("{url: '"+ data.data.filepreview+"',savePath: 'cacheDir://极速培训/"+data.CSFILEID + "/" + data.data.fileName +"',iconPath:'"+data.data.filecover+"',cache: true,allowResume: true,title: '"+data.data.fileName+"',networkTypes: 'all'}"));
+   downfile({url: '"+ data.data.filepreview+"',savePath: 'cacheDir://极速培训/"+data.data.upId + "/" + data.data.fileName +"',iconPath:'"+data.data.filecover+"',cache: true,allowResume: true,title: '"+data.data.fileName+"',networkTypes: 'all'});
+ }else{
+   $.toast("文件下载为空！");
+ }
+}

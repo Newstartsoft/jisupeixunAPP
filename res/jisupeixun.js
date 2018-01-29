@@ -915,7 +915,7 @@ function ziliaoinit() {
                         }
                         $("#zhiliaoback").show(); //显示返回键
                         $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-                        $("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+                        //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
                     }
                     $.hideIndicator();
                 });
@@ -985,7 +985,7 @@ $(document).on("click", "#zhiliaoshuaxin", function () {
                                     } else {
                                         $("#zhiliaoback").show();
                                         $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-                                        $("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+                                        //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
                                         getfilelist(pid, "", "", "", 2, pageSize, 1);
                                     }
                                 }
@@ -1026,7 +1026,7 @@ $(document).on("click", "#zhiliaoshuaxin", function () {
                                     } else {
                                         $("#zhiliaoback").show();
                                         $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-                                        $("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+                                        //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
                                         getfilelist(pid, "", "", "", 2, pageSize, 1);
                                     }
                                 }
@@ -1157,7 +1157,7 @@ $(document).on('click', '#orgfile', function () {
     $("#zhiliaoadd").hide();//隐藏添加
     $("#zhiliaoback").show();
     $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-    $("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+    //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
     fid = "main";
     getorglist(2, ""); //fid等于null，查询企业共享文件，不等于null，查询文件夹下的文件
 });
