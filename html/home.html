@@ -556,13 +556,18 @@ apiready = function(){
   winapi = api;
   downloadManager = api.require('downloadManager');
   var locationHref = window.location.toString();
+  api.setStatusBarStyle({
+      style: '#000'
+  });
 };
 
-//打开离线缓存列表 
+//打开离线缓存列表
 function openDownManager(){
+
   downloadManager.openManagerView({
       title: '离线缓存'
   }, function(ret, err) {
+    console.log(ret);
       if (ret) {
           //打开预览文件
           downloadManager.closeManagerView();//关闭窗口
@@ -575,7 +580,6 @@ function openDownManager(){
           {
               //打开文件时候触发
               abc();
-              console.log(JSON.stringify(ret));
               var fileobj = {};
               fileobj.upId = ret.id;
               fileobj.fileType =undefined;//ret.mimeType;文件后缀名，传空，自动截取
@@ -604,6 +608,7 @@ downloadManager.enqueue(fileobj, function(ret, err) {
 }
 
 </script>
+<script type='text/javascript' src="../res/AppStudy.js"></script>
 <script type='text/javascript' src="../res/jisupeixun.js"></script>
 </body>
 </html>
