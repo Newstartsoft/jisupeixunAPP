@@ -4675,15 +4675,14 @@ function BDPlayerLoader(){
   }
 }
 function abc(){
-  console.log(GetlocalStorage("fileobj"));
   var data = {data:GetlocalStorage("fileobj")};
-  console.log(data);
-  if (data.errorcode == 0 && data.data != null) {
+  if (data.data != null) {  //data.errorcode == 0 &&
         if (data.data.fileType==undefined){
             data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1);
         }
         if (data.data.fileType == "pdf" || data.data.fileType == "docx" || data.data.fileType == "doc" || data.data.fileType == "xls" || data.data.fileType == "xlsx" || data.data.fileType == "ppt" || data.data.fileType == "pptx") {
             $(".content_yulan").html("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
+            console.log("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
         } else if (data.data.fileType == "txt") {
             $(".content_yulan").html("<iframe src='" + data.data.filepreview + "' style='width:100%;border:0' ></iframe>");
         } else if (data.data.fileType == "mp4") {
