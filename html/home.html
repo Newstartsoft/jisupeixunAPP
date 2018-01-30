@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="../res/css/light7-swiper.min.css" type="text/css">
     <style type="text/css">
           .item-media img{ width: 40px;  }
-          .head_top_menu a{width: 25%;}
     </style>
     <script type="javascript">
     $.config = {
@@ -50,17 +49,16 @@
   <div class="content">
     <div class="home_head" >
         <div class="top">
-            <div class="soso"><input type="text" placeholder="请输入课程关键词" name="" id="publicCourseName"><a href="#course"> <i class="iconfont"onclick="goPublicCourse()">&#xe63b;</i></a></div>
-            <div class="xiaoxi"><a onClick="nofunction()"><i class="iconfont" >&#xe670;</i></a></div>
+            <div class="soso" style="width: 100%;    margin-left: 0px;"><input type="text" placeholder="请输入课程关键词" name="" id="publicCourseName"><a href="#course"> <i class="iconfont"onclick="goPublicCourse()">&#xe63b;</i></a></div>
+            <!-- <div class="xiaoxi"><a onClick="nofunction()"><i class="iconfont" >&#xe670;</i></a></div> -->
         </div>
         <div class="clear"></div>
-        <div class="head_top_menu">
+        <div class="head_top_menu" style="display:none;">
             <a href="#course" id="course_m"><i class="iconfont">&#xe725;</i>公开课</a>
             <a href="#renwu" id="renwu_m"><i class="iconfont">&#xe651;</i>任务</a>
             <a href="#ziliao"  id="ziliao_m2"><i class="iconfont">&#xe653;</i>知识库</a>
-            <!-- <a onClick="nofunction()"><i class="iconfont" style="font-size: 1.8rem;  margin-top: -.2rem;    margin-bottom: -.25rem;">&#xe68a;</i>商城</a> -->
+            <a onClick="nofunction()"><i class="iconfont" style="font-size: 1.8rem;  margin-top: -.2rem;    margin-bottom: -.25rem;">&#xe68a;</i>商城</a>
             <a onClick="nofunction()"><i class="iconfont">&#xe681;</i>课件录制</a>
-
         </div>
     </div>
     <div class="swiper-container" data-space-between='10' data-pagination='.swiper-pagination' data-autoplay="1000" style="height: 130px; background-color:#fff;">
