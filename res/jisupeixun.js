@@ -834,7 +834,6 @@ function ziliaoinit() {
                         $("#deleteblock").hide();
                         return false;
                     }
-
                 });
           $.hideIndicator();
       });
@@ -915,7 +914,7 @@ function ziliaoinit() {
                         }
                         $("#zhiliaoback").show(); //显示返回键
                         $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-                        //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+                        $("#ios-create").removeClass("pull-left").addClass("pull-right");
                     }
                     $.hideIndicator();
                 });
@@ -985,7 +984,7 @@ $(document).on("click", "#zhiliaoshuaxin", function () {
                                     } else {
                                         $("#zhiliaoback").show();
                                         $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-                                        //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+                                        $("#ios-create").removeClass("pull-left").addClass("pull-right");
                                         getfilelist(pid, "", "", "", 2, pageSize, 1);
                                     }
                                 }
@@ -1026,25 +1025,27 @@ $(document).on("click", "#zhiliaoshuaxin", function () {
                                     } else {
                                         $("#zhiliaoback").show();
                                         $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-                                        //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+                                        $("#ios-create").removeClass("pull-left").addClass("pull-right");
                                         getfilelist(pid, "", "", "", 2, pageSize, 1);
                                     }
                                 }
                     }
                      //如果在企业文件夹下，隐藏创建按钮
-                                if(intoOrg){
-                                    if(browser.versions.ios){
-                                        $(".ios-is-show").hide();
-                                    }else{
-                                        $("#zhiliaoadd").hide();
-                                    }
-                                }else{
-                                    if(browser.versions.ios){
-                                        $(".ios-is-show").show();
-                                    }else{
-                                        $("#zhiliaoadd").show();
-                                    }
-                                }
+                      if(intoOrg){
+                          if(browser.versions.ios){
+                              $(".ios-is-show").hide();
+                          }else{
+                              $("#zhiliaoadd").hide();
+                          }
+                      }else{
+                          if(browser.versions.ios){
+                              $(".ios-is-show").show();
+                          }else{
+                              $("#zhiliaoadd").show();
+                          }
+                      }
+                    $("#zhiliaoshuaxin").show();
+                    $("#ios-create").addClass("pull-left").removeClass("pull-right");
                    $.hideIndicator();
                 });
 
@@ -1147,8 +1148,8 @@ $(document).on('change','#fileIosId',function(){
     }
     xhr.send(formData);
 })
-//是否进入了企业文件夹
 var intoOrg = false;
+//是否进入了企业文件夹
   //企业文件夹的单击事件
 $(document).on('click', '#orgfile', function () {
     intoOrg = true;
@@ -1157,7 +1158,7 @@ $(document).on('click', '#orgfile', function () {
     $("#zhiliaoadd").hide();//隐藏添加
     $("#zhiliaoback").show();
     $("#zhiliaoshuaxin").hide();//文件夹内隐藏刷新按钮
-    //$("#zhiliaoadd").addClass("pull-right").removeClass("pull-left");
+    $("#ios-create").removeClass("pull-left").addClass("pull-right");
     fid = "main";
     getorglist(2, ""); //fid等于null，查询企业共享文件，不等于null，查询文件夹下的文件
 });
@@ -3123,7 +3124,6 @@ function openfile(stringjson) {
     SetlocalStorage("fileobj", JSON.stringify(stringjson));
     var dangqianUrl = window.location.href;
     var lastH = dangqianUrl.substring(dangqianUrl.lastIndexOf('/') + 1, dangqianUrl.lastIndexOf('.'));
-    console.log(lastH);
     if(lastH != "home"){
       $.router.loadPage("../../html/wenjian/yulan.html");
     }else {
@@ -3156,10 +3156,12 @@ function openfile1(path) {
 
 function abc(){
   var data = {data:GetlocalStorage("fileobj")};
+  console.log(JSON.stringify(data));
   if (data.data != null) {  //data.errorcode == 0 &&
         if (data.data.fileType==undefined){
-            data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1);
+            data.data.fileType=data.data.filepreview.substr(data.data.filepreview.lastIndexOf(".")+1).replace("'", "");
         }
+        console.log(data.data.filepreview);
         if (data.data.fileType == "pdf" || data.data.fileType == "docx" || data.data.fileType == "doc" || data.data.fileType == "xls" || data.data.fileType == "xlsx" || data.data.fileType == "ppt" || data.data.fileType == "pptx") {
             $(".content_yulan").html("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
             console.log("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
@@ -3199,7 +3201,8 @@ function abc(){
                              || data.data.fileType == "JPEG" || data.data.fileType == "GIF" || data.data.fileType == "WBMP" || data.data.fileType == "PNG") {
             $(".content_yulan").html(" <div ><img id='fileimg'  src='" + data.data.filepreview + "'   style='width:100%' /></div> ");
         } else {
-            $(".content_yulan").html(" <div style='text-align: center;margin-top: 60%;color: #CCC;font-size: 20px;' >文件不支持预览！</div> ");
+            //$(".content_yulan").html(" <div style='text-align: center;margin-top: 60%;color: #CCC;font-size: 20px;' >文件不支持预览！</div> ");
+            $(".content_yulan").html(" <div ><img id='fileimg'  src='" + data.data.filepreview + "'   style='width:100%' /></div> ");
         }
     }
 }

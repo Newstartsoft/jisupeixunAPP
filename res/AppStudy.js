@@ -190,7 +190,7 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                if(csobj.stypename == "视频"){
                   var chapterobj = eval(csobj.chapterJson);
                   if(chapterobj[0].fileType != "m3u8"){
-                    xiazaihtml = "<div class='button ' style=\"margin-left: -0.5rem;\"><i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj[0].filepreview+"',savePath: 'cacheDir://极速培训/"+csobj.CSFILEID + "/" + chapterobj[0].fileName +"',iconPath:'"+chapterobj[0].filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i></div>";
+                    xiazaihtml = "<div class='button ' style=\"margin-left: -0.5rem;\"><i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj[0].filepreview+"',savePath: 'fs://极速培训/"+csobj.CSFILEID + "/" + chapterobj[0].fileName +"',iconPath:'"+chapterobj[0].filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i></div>";
                   }
                }
                zjhtml+= "<li class=\"item-content\" id='kecheng_"+csobj.CSID+"'><div class=\"item-inner\" onClick='bofang("+JSON.stringify(csobj)+")'><div class=\"item-title\" style=\"min-width:75%;\">"+csobj.CSNAME.replace(/<\/?[^>]*>/g,'')+"</div>";
@@ -1499,8 +1499,16 @@ function chapterZK() {
 function huancunxiazai() {
   var data = {data:GetlocalStorage("fileobj")};
   if (data.data != null) {
-   console.log(JSON.stringify("{url: '"+ data.data.filepreview+"',savePath: 'cacheDir://极速培训/"+data.CSFILEID + "/" + data.data.fileName +"',iconPath:'"+data.data.filecover+"',cache: true,allowResume: true,title: '"+data.data.fileName+"',networkTypes: 'all'}"));
-   downfile({url: '"+ data.data.filepreview+"',savePath: 'cacheDir://极速培训/"+data.data.upId + "/" + data.data.fileName +"',iconPath:'"+data.data.filecover+"',cache: true,allowResume: true,title: '"+data.data.fileName+"',networkTypes: 'all'});
+   var jsonObj = {
+     "url": data.data.filepreview,
+     "savePath": "fs://极速培训/"+data.data.upId + "/" + data.data.fileName,
+     "iconPath":data.data.filecover,
+     "cache": true,
+     "allowResume": true,
+     "title": data.data.fileName,
+     "networkTypes": 'all'
+   };
+   downfile(jsonObj);
  }else{
    $.toast("文件下载为空！");
  }
