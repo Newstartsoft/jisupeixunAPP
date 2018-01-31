@@ -1181,11 +1181,11 @@ var mainplayer = function(Cantent, Height, mima) {
 
 
 //封装百度播放器
+bPlayer = api.require('bPlayer');  //实例化百度播放器
 var BaiDuPlayer = new function(){
 try{
   //播放
   this.play = function (Cantent, Height, mima){
-    bPlayer = api.require('bPlayer');  //实例化百度播放器
     var systemType = api.systemType;
     if(systemType == 'ios'){
       bPlayer.open({

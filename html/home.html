@@ -15,8 +15,6 @@
     <style type="text/css">
           .item-media img{ width: 40px;  }
     </style>
-    <script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
-    <script type='text/javascript' src="../../res/socket.js"></script>
 </head>
 
  <body ><!--class="theme-dark" 开启夜间模式，tabbar-hidden隐藏菜单-->
@@ -561,7 +559,6 @@
 <!-- <script type="text/javascript" src="../script/mainscript1.0.js"></script> -->
 <script type="text/javascript">
 var winapi = {};
-var Messaging = "";
 var downloadManager;//下载插件对象
 apiready = function(){
   winapi = api;
@@ -628,6 +625,9 @@ downloadManager.enqueue(fileobj, function(ret, err) {
 }
 
 </script>
+<script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
+<script type='text/javascript' src="../res/Function4.0.js"></script>
+<script type='text/javascript' src="../res/socket.js"></script>
 <script type='text/javascript' src="../res/AppStudy.js"></script>
 <script type='text/javascript' src="../res/jisupeixun.js"></script>
 

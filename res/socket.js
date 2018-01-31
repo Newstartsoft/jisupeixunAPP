@@ -1,19 +1,24 @@
 ﻿///<summary>
 ///消息通道
 ///</summary>
-Messaging = new function () {
-
+var Messaging = new function () {
     //验证消息通道
     //var msg_sdk = new Yunba({ appkey: '55cc0d389477ebf52469582a' });
     this.socket = io.connect('ws://123.57.255.51:3000');
     this.mancount = 0;
     var userList = [], numUsers = 1, username = ''; //用户列表、直播间当前在线人数、用户信息、用户总数
-
+    var flashvars = {};
+    var roleId = ""; // 1、学生 0、老师
+    var CHATROOM_TOPIC = "";
+    var tempHtml="";
     ///<summary>
     ///初始化
     ///</summary>
-    this.initMsg = function () {
-		$("#loading").hide();
+    this.initMsg = function (flashvarsObj) {
+      flashvars = flashvarsObj;
+      roleId = flashvars.type; // 1、学生 0、老师
+      CHATROOM_TOPIC = flashvars.rid;
+		    $("#loading").hide();
         Messaging.setAlias();
         Messaging.getOnlineUsers();
 
@@ -26,7 +31,7 @@ Messaging = new function () {
     ///</summary>
     this.setAlias = function () {
         var alias = flashvars.name + "|" + flashvars.id + "|" + flashvars.type;
-        this.socket.emit('login', { userid: flashvars.id, username: flashvars.name, userRoom: flashvars.rid, usertype: flashvars.type, alias: alias });
+        this.socket.emit('login', { userid: flashvars.id, username: flashvars.name, userimg: flashvars.user_img, userRoom: flashvars.rid, usertype: flashvars.type, alias: alias });
         Messaging.removeOnlineUserElement();
         this.socket.on('message', function (data) {
             Messaging.dataController(data.msg);
@@ -53,23 +58,24 @@ Messaging = new function () {
             var strs = username.split("|"); //字符分割
             try {
                 // 0 老师 1 学员
-                if (strs[1] == flashvars.id) {
-                    $userListItem = $('<li class="list-group-item" ></li>').html('<div class="chat-online-listimg"><img src="/images/User_Image.jpg"></div><div class="online-list-right"><div class="online-list-userrole">[我]</div><div class="online-list_username">' + strs[0] + '</div></div>');
+                if (strs[1] == flashvars.id) {  //判断是自己
+                    $userListItem = $('<li class="item-content"></li>').html('<div class="item-media"><img src="../../res/img/avatar.png" style="width: 2.2rem;border-radius:50%"></div><div class="item-inner"><div class="item-title">' + strs[0] + '</div><div class="item-after">【我】</div></div>');
                 } else {
-                    if (strs[2] == 0) {
-                        $userListItem = $('<li class="list-group-item" ></li>').html('<div class="chat-online-listimg"><img src="/images/User_Image.jpg"></div><div class="online-list-right"><div class="online-list-userrole">[老师]</div><div class="online-list_username">' + strs[0] + '</div></div>');
+                    if (strs[2] == 0) { //其他用户
+                        $userListItem = $('<li class="item-content"></li>').html('<div class="item-media"><img src="../../res/img/avatar.png" style="width: 2.2rem;border-radius:50%"></div><div class="item-inner"><div class="item-title">' + strs[0] + '</div><div class="item-after">【讲师】</div></div>');
                     } else if (strs[2] == 1) {
-                        if (flashvars.type == 0) {
+                        if (flashvars.type == 0) {  //老师
                             if (sysResource.GetlocalStorage("state_" + user[1]) == "1") {
-                                $userListItem = $('<li class="list-group-item" ></li>').html("<div class=\"chat-online-listimg\"><img src=\"/images/User_Image.jpg\"></div><div class=\"online-list-right\"><div class=\"online-list-userrole\">[学员]</div><div class=\"online-list_username\">" + strs[0] + "</div></div><span style=\"float:right;\"><i class=\"ico icojcjy\" title=\"禁言\" onclick=\"jinyan_user(this,'" + user[1] + "',0)\" ></i><i class=\"ico icotc\" title=\"踢出\" onclick=\"tichu_user(this,'" + user[1] + "')\"></i>");
+                                //$userListItem = $('<li class="list-group-item" ></li>').html("<div class=\"chat-online-listimg\"><img src=\"/images/User_Image.jpg\"></div><div class=\"online-list-right\"><div class=\"online-list-userrole\">[学员]</div><div class=\"online-list_username\">" + strs[0] + "</div></div><span style=\"float:right;\"><i class=\"ico icojcjy\" title=\"禁言\" onclick=\"jinyan_user(this,'" + user[1] + "',0)\" ></i><i class=\"ico icotc\" title=\"踢出\" onclick=\"tichu_user(this,'" + user[1] + "')\"></i>");
                             } else {
-                                $userListItem = $('<li class="list-group-item" ></li>').html("<div class=\"chat-online-listimg\"><img src=\"/images/User_Image.jpg\"></div><div class=\"online-list-right\"><div class=\"online-list-userrole\">[学员]</div><div class=\"online-list_username\">" + strs[0] + "</div></div><span style=\"float:right;\"><i class=\"ico icojinyan\" title=\"禁言\" onclick=\"jinyan_user(this,'" + user[1] + "',1)\" ></i><i class=\"ico icotc\" title=\"踢出\" onclick=\"tichu_user(this,'" + user[1] + "')\"></i>");
+                                //$userListItem = $('<li class="list-group-item" ></li>').html("<div class=\"chat-online-listimg\"><img src=\"/images/User_Image.jpg\"></div><div class=\"online-list-right\"><div class=\"online-list-userrole\">[学员]</div><div class=\"online-list_username\">" + strs[0] + "</div></div><span style=\"float:right;\"><i class=\"ico icojinyan\" title=\"禁言\" onclick=\"jinyan_user(this,'" + user[1] + "',1)\" ></i><i class=\"ico icotc\" title=\"踢出\" onclick=\"tichu_user(this,'" + user[1] + "')\"></i>");
                             }
-                        } else if (flashvars.type == 1) {
-                            $userListItem = $('<li class="list-group-item" ></li>').html("<div class=\"chat-online-listimg\"><img src=\"/images/User_Image.jpg\"></div><div class=\"online-list-right\"><div class=\"online-list-userrole\">[学员]</div><div class=\"online-list_username\">" + strs[0] + "</div>" + "</div>");
+                        } else if (flashvars.type == 1) {   //学生
+                            //$userListItem = $('<li class="list-group-item" ></li>').html("<div class=\"chat-online-listimg\"><img src=\"/images/User_Image.jpg\"></div><div class=\"online-list-right\"><div class=\"online-list-userrole\">[学员]</div><div class=\"online-list_username\">" + strs[0] + "</div>" + "</div>");
+                            $userListItem = $('<li class="item-content"></li>').html('<div class="item-media"><img src="../../res/img/avatar.png" style="width: 2.2rem;border-radius:50%"></div><div class="item-inner"><div class="item-title">' + strs[0] + '</div><div class="item-after">【学员】</div></div>');
                         }
                     } else {
-                        $userListItem = $('<li class="list-group-item" ></li>').html('<img src="/images/user-yellow.png" />' + strs[0]);
+                        $userListItem = $('<li class="item-content"></li>').html('<img src="http://live.edu-paas.com/images/user-yellow.png" />' + strs[0]);
                     }
                 }
                 $userListItem.attr('id', strs[1]);
@@ -160,7 +166,7 @@ Messaging = new function () {
                     var $messageLi = $('<li class="chat-message_item talk_teacher"></li>').append("<div class=\"chat-message_itemmain\"><div class=\"chat-message_itembody\"><div class=\"chat-message_itemimg\"><img src=\"/images/User_Image.jpg\" alt=\"user_image\"></div><div class=\"nametime\"><span class=\"chat-username\">" + data.username + "</span><span class=\"chat-time\">" + sysConfig.CurentTime() + "</span><div class=\"clear\"></div></div><div class=\"send\"><span class=\"chat-message-body\">" + decodeMsg + "</span><div class=\"arrow\"></div></div></div></div>");
                     $chatMessages.append($messageLi);
                 } else {
-                    var $messageLi = $('<li class="chat-message_item "></li>').append("<div class=\"chat-message_itemmain\"><div class=\"chat-message_itembody\"><div class=\"chat-message_itemimg\"><img src=\"/images/User_Image.jpg\" alt=\"user_image\"></div><div class=\"nametime\"><span class=\"chat-username\">" + data.username + "</span><span class=\"chat-time\">" + sysConfig.CurentTime() + "</span><div class=\"clear\"></div></div><div class=\"send\"><span class=\"chat-message-body\">" + decodeMsg + "</span><div class=\"arrow\"></div></div></div></div>");
+                    var $messageLi = $('<li></li>').append("<div class=\"content-block-title\"><img src=\"../../res/img/avatar.png\" style=\"width: 2.2rem;border-radius:50%\">"+data.username+"<span class=\"pull-right\">" + sysConfig.CurentTime() + "</span></div><div class=\"card\"><div class=\"card-content\"><div class=\"card-content-inner\">" + decodeMsg + "</div></div></div>");
                     $chatMessages.append($messageLi);
                 }
             }
@@ -208,6 +214,7 @@ Messaging = new function () {
             dataContent: messageStr,
             username: flashvars.name,
             userid: flashvars.id,
+            userimg: flashvars.user_img,
             livetiem: zbtiem,
             usertype: flashvars.type
         });
@@ -675,4 +682,3 @@ Messaging = new function () {
         //debugger;
     }
 }
-$.init();

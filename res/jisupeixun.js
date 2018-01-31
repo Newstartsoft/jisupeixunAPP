@@ -2,23 +2,7 @@
 //*************************************************
 //全局界面切换监听
 //*************************************************
-var flashvars = { rooid: "imo0q7jzbc8jkde40u",
-          /* url: 'rtmp://push.bj.bcelive.com/live/', */
-          rid: 'd88119fb-d35b-4ae1-a2ed-eaa6d00ab05f',
-          rtmpVideo: '',
-          name: '学员3',
-          id: '48f3889c-af8d-401f-ada2-c383031af923',
-          type: 1,
-          record: 'false',
-          bookname: "fff",
-          data: "2016-5-31 18:36:33",
-          createuserName: "",
-          teacherid: "f8b1ceea-f526-4639-95c5-31627b323e52",
-          ms: "v"    //v 声音 s 视频
-      };
-      var roleId = flashvars.type; // 1、学生 0、老师
-             var CHATROOM_TOPIC = flashvars.rid;
-     		var tempHtml="";
+
 var javaserver = "http://180.76.156.234:9187";
 var javafile = "http://file.jisupeixun.com";//文件上传接口
 var systemTitle="极速培训";
@@ -1358,46 +1342,40 @@ $(document).on('click','#ios-create',function(){
 			}
 });
 
-  $(document).on('click','.create-actions', function () {
-      var buttons1 = [
-        {
-          text: '上传文件',
-          bold: true,
-          color: 'danger',
-          onClick: function () {
-            console.log(browser.versions.ios);
-            if(browser.versions.ios){
-                $("#fileIosId").click();
-            }else{fileOnload($(".title").html(), parentid, fpath);}
-          }
-        },
-        {
-          text: '创建文件夹',
-          onClick: function() {
-              $.prompt('请输入文件夹的名字','', function (value) {
-                 addfolder(value,parentid);
-            },null,'新建文件夹');
-            $(".modal-inner input").attr("placeholder","新建文件夹");
-				if($(".modal-inner input").val()=="新建文件夹"){
-					$(".modal-inner input").val("");
-				}
-          }
+$(document).on('click','.create-actions', function () {
+    var buttons1 = [
+      {
+        text: '上传文件',
+        bold: true,
+        color: 'danger',
+        onClick: function () {
+          console.log(browser.versions.ios);
+          if(browser.versions.ios){
+              $("#fileIosId").click();
+          }else{fileOnload($(".title").html(), parentid, fpath);}
         }
-      ];
-      var buttons2 = [
-        {
-          text: '取消',
-          bg: 'danger'
-        }
-      ];
-      var groups = [buttons1, buttons2];
-      $.actions(groups);
-
-      if(isWeiXin()){
-        $(".color-danger").css("color","#0894ec");
-        $(".bg-danger").css("background-color","gray");
-        $(".actions-modal-button").css("font-size","16px");
+      },
+      {
+        text: '创建文件夹',
+        onClick: function() {
+            $.prompt('请输入文件夹的名字','', function (value) {
+               addfolder(value,parentid);
+          },null,'新建文件夹');
+          $(".modal-inner input").attr("placeholder","新建文件夹");
+      if($(".modal-inner input").val()=="新建文件夹"){
+        $(".modal-inner input").val("");
       }
+        }
+      }
+    ];
+    var buttons2 = [
+      {
+        text: '取消',
+        bg: 'danger'
+      }
+    ];
+    var groups = [buttons1, buttons2];
+    $.actions(groups);
 });
 //**********************************************************************************
 //                               文件预览
@@ -2719,6 +2697,7 @@ sysUserInfo=getUserInfo();
 
 /**********直播界面初始化***********/
 $(document).on("pageInit", "#livedetail", function(e, id, $page) {
+    sysUserInfo=getUserInfo();
     var livedata = GetlocalStorage("LiveBroadcast_Info");
     //var roomPwd =livedata.content.liveobj.roomid;
     var liveName = livedata.CSNAME;
@@ -2727,12 +2706,24 @@ $(document).on("pageInit", "#livedetail", function(e, id, $page) {
     var liveInfoObj = livedata.liveObj;
     var roomid = liveInfoObj.roomid;
     var rtmpUrl = liveInfoObj.playrmtpurl;
-    console.log(rtmpUrl);
+    var luzhi_url = liveInfoObj.luzhi_url; //回放地址
     BaiDuPlayer.play("","", rtmpUrl);
-    setTimeout(function () {
-      Messaging.initMsg();
-      $.init();
-    }, 10000);
+    flashvars = {
+        rooid: "",
+        rid: roomid,
+        rtmpVideo: '',
+        name: sysUserInfo.user_Name,
+        user_img: sysUserInfo.user_Img,
+        id: sysUserInfo.user_ID,
+        type: 1,
+        record: 'false',
+        bookname: "fff",
+        data: livedata.CSSTIME,  //直播开始时间
+        createuserName: sysUserInfo.createUserName,
+        teacherid: "",
+        ms: "v"    //v 声音 s 视频
+    };
+    Messaging.initMsg(flashvars);
 });
 /******************************************查询方法结束*************************************************/
 //====================公共方法===========================
@@ -3257,14 +3248,13 @@ console.log(e);
 
 //发言
 function AddFaYan(){
-
   var data = JSON.stringify({
-         dataType: 'MESSAGE',
+       dataType: 'MESSAGE',
        dataContent: "messageStr",
        username: flashvars.name,
        userid: flashvars.id,
        livetiem: new Date().getTime(),
        usertype: flashvars.type
    });
-   Messaging.publish(CHATROOM_TOPIC, data);
+   Messaging.publish(flashvars.rid, data);
 }
