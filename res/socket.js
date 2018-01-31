@@ -21,10 +21,9 @@ var Messaging = new function () {
 		    $("#loading").hide();
         Messaging.setAlias();
         Messaging.getOnlineUsers();
-
-                    //liveRecord.GetLiveRecord();
-                    /*获取在线的直播视频*/
-                    //getplay();
+        //liveRecord.GetLiveRecord();
+        /*获取在线的直播视频*/
+        //getplay();
     }
     ///<summary>
     ///设置通讯中使用的别名
@@ -138,7 +137,6 @@ var Messaging = new function () {
     ///在聊天框中输出一条信息
     ///</summary>
     this.addMessageElement = function (data, isLog) {
-
         var $chatMessages = $('#chat-messages');
         if (data.hasOwnProperty("dataContent")) {
             if (isLog) {
@@ -160,14 +158,19 @@ var Messaging = new function () {
                         }
                     }
                 }
-
-
-                if (data.usertype == 0) {
-                    var $messageLi = $('<li class="chat-message_item talk_teacher"></li>').append("<div class=\"chat-message_itemmain\"><div class=\"chat-message_itembody\"><div class=\"chat-message_itemimg\"><img src=\"/images/User_Image.jpg\" alt=\"user_image\"></div><div class=\"nametime\"><span class=\"chat-username\">" + data.username + "</span><span class=\"chat-time\">" + sysConfig.CurentTime() + "</span><div class=\"clear\"></div></div><div class=\"send\"><span class=\"chat-message-body\">" + decodeMsg + "</span><div class=\"arrow\"></div></div></div></div>");
-                    $chatMessages.append($messageLi);
-                } else {
-                    var $messageLi = $('<li></li>').append("<div class=\"content-block-title\"><img src=\"../../res/img/avatar.png\" style=\"width: 2.2rem;border-radius:50%\">"+data.username+"<span class=\"pull-right\">" + sysConfig.CurentTime() + "</span></div><div class=\"card\"><div class=\"card-content\"><div class=\"card-content-inner\">" + decodeMsg + "</div></div></div>");
-                    $chatMessages.append($messageLi);
+                if (data.usertype == 0) {  //老师
+                    $("#live_nofayan").hide();
+                    var messageLi1 = "<div class=\'nishuo laoshi\'><img src=\'"+data.userimg+"\' class=\'touxiang\' /><div class=\'name\'>"+data.username + sysConfig.CurentTime()+"</div><div class=\'nairong\'><span class=\'triangle-left\'></span><span>"+decodeMsg+"</span></div></div>";
+                    $(".chat-messages").append(messageLi1);
+                } else {  //学员
+                    $("#live_nofayan").hide();
+                    var sysUserInfo1=getUserInfo();
+                    var messageLi1 = "<div class=\'nishuo\'><img src=\'"+data.userimg+"\' class=\'touxiang\' /><div class=\'name\'>"+data.username + sysConfig.CurentTime()+"</div><div class=\'nairong\'><span class=\'triangle-left\'></span><span>"+decodeMsg+"</span></div></div>";
+                    console.log(sysUserInfo1.user_ID +"||"+ data.userid);
+                    if(sysUserInfo1.user_ID == data.userid){ //自己发言
+                      messageLi1 = "<div class=\'woshuo\'><img src=\'"+data.userimg+"\' class=\'touxiang\' /><div class=\'nairong\'><span class=\'triangle-left\'></span><span>"+decodeMsg+"</span></div></div>";
+                    }
+                    $(".chat-messages").append(messageLi1);
                 }
             }
         }

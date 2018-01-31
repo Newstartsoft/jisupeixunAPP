@@ -12,43 +12,15 @@
     <script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
     <script type='text/javascript' src="../../res/socket.js"></script>
     <script type='text/javascript' src="../../res/Function4.0.js"></script>
-    <style type="text/css">
-    .shanguang{width: 50%;height: 5rem;overflow: hidden;position: relative; margin: 3rem auto; text-align: center;}
-    .shanguang img{max-width: 210px; width: 100%;}
-    .shanguang .baiguang{position: absolute;width: 3rem;height: 3rem;top: 0;
-                left: -5rem;overflow: hidden;background-image: linear-gradient(to right,rgba(255,255,255,.2) 0,rgba(255,255,255,.5) 50%,rgba(255,255,255,.2) 100%);/*linear-gradient渐变效果*/
-                transform: skewX(-25deg);/*沿x轴倾斜*/
-                animation: shanguang 3s;
-                animation-iteration-count:1000;}
-     @keyframes shanguang {
-                from { left: -5rem;}
-                to { left: 18rem;}
-     }
-    .keshow{background: #313131;background:-moz-linear-gradient(top, #313131,  #3d3d3d);background:-webkit-gradient(linear, 0 0, 0 bottom, from(#313131), to(#3d3d3d));}
-    h2{ border-bottom: 1px #ddd solid;margin:0.5rem 0; padding: 0.5rem 0;}
-    #renwu_detail .jisuvideo{height: 10rem;}
-    .nishuo{ overflow: hidden;    margin: 8px auto; }
-    .nishuo  .touxiang{ float: left; width:  12%; height: 12%; border-radius: 50%; }
-    .nishuo  .name{float: right; width:83%; font-size: 12px }
-    .nishuo .nairong{ background-color: #fff; border-radius: 5px; float: left;max-width:  83%; position: relative;  padding: 2%; margin-left: 3%;}
-    .nishuo .triangle-left {   width: 0;   height: 0;   border-top: 5px solid transparent;   border-right: 10px solid #fff;   border-bottom: 5px solid transparent;  position: absolute; left: -10px;  top: 10px; }
-    .woshuo{ overflow: hidden;    margin: 8px auto;}
-    .woshuo  .touxiang{ float: right; width:  12%; height: 12%; border-radius: 50%; }
-    .woshuo  .name{float: right; font-size: 12px }
-    .woshuo .nairong{ background-color: #39f; color: #fff; border-radius: 5px; float: right;position: relative;  padding: 2%; margin-right: 3%; max-width: 83%;}
-    .woshuo .triangle-left {   width: 0;   height: 0;   border-top: 5px solid transparent;   border-left: 10px solid #39f;   border-bottom: 5px solid transparent;  position: absolute; right:  -10px;  top: 10px; }
-    .textbox{ position: fixed; bottom: 0; width: 100%;  background-color: #fff;  border-top:1px #ddd solid;    left: 0;    padding: 8px; }
-    .textbox input{width: 90%;border: 1px #ddd solid;padding: 5px;}
-    .laoshi .nairong{ background-color: #ffd633; }
-    .laoshi .nairong .triangle-left{border-right: 10px solid #ffd633;}
-    .textbox .send{    font-size: 16px;    border: 1px #ddd solid;    padding: 6px 0;    border-radius: 3px;    background-color: #ddd;    color: #fff;}
-</style>
+    <script type='text/javascript' src="../../res/AppStudy.js"></script>
+
 </head>
 <body class="tabbar-hidden" onload="Messaging.initMsg();"><!--class="theme-dark" 开启夜间模式-->
 <!--系统第一部分，界面组-->
  <div class="page-group">
   <!--单个界面，如果多个界面page-current代表默认显示的-->
  <div class="page page-current no-tabbar" id="livedetail">
+
   <!--界面标题-->
   <header class="bar bar-nav theme-dark" style="background: #313131">
         <a class="button button-link button-nav pull-left " onclick="live_detail_black()">
@@ -67,14 +39,47 @@
 </div>
 <!--界面内容-->
 <div class="content" id="kechengContent" style="top: 12rem">
+<style type="text/css">
+.shanguang{width: 50%;height: 5rem;overflow: hidden;position: relative; margin: 3rem auto; text-align: center;}
+.shanguang img{max-width: 210px; width: 100%;}
+.shanguang .baiguang{position: absolute;width: 3rem;height: 3rem;top: 0;
+            left: -5rem;overflow: hidden;background-image: linear-gradient(to right,rgba(255,255,255,.2) 0,rgba(255,255,255,.5) 50%,rgba(255,255,255,.2) 100%);/*linear-gradient渐变效果*/
+            transform: skewX(-25deg);/*沿x轴倾斜*/
+            animation: shanguang 3s;
+            animation-iteration-count:1000;}
+ @keyframes shanguang {
+            from { left: -5rem;}
+            to { left: 18rem;}
+ }
+.keshow{background: #313131;background:-moz-linear-gradient(top, #313131,  #3d3d3d);background:-webkit-gradient(linear, 0 0, 0 bottom, from(#313131), to(#3d3d3d));}
+h2{ border-bottom: 1px #ddd solid;margin:0.5rem 0; padding: 0.5rem 0;}
+#renwu_detail .jisuvideo{height: 10rem;}
+.nishuo{ overflow: hidden;    margin: 8px auto; }
+.nishuo  .touxiang{ float: left; width:  12%; height: 12%; border-radius: 50%; }
+.nishuo  .name{float: right; width:83%; font-size: 12px }
+.nishuo .nairong{ background-color: #fff; border-radius: 5px; float: left;max-width:  83%; position: relative;  padding: 2%; margin-left: 3%;}
+.nishuo .triangle-left {   width: 0;   height: 0;   border-top: 5px solid transparent;   border-right: 10px solid #fff;   border-bottom: 5px solid transparent;  position: absolute; left: -10px;  top: 10px; }
+.woshuo{ overflow: hidden;    margin: 8px auto;}
+.woshuo  .touxiang{ float: right; width:  12%; height: 12%; border-radius: 50%; }
+.woshuo  .name{float: right; font-size: 12px }
+.woshuo .nairong{ background-color: #39f; color: #fff; border-radius: 5px; float: right;position: relative;  padding: 2%; margin-right: 3%; max-width: 83%;}
+.woshuo .triangle-left {   width: 0;   height: 0;   border-top: 5px solid transparent;   border-left: 10px solid #39f;   border-bottom: 5px solid transparent;  position: absolute; right:  -10px;  top: 10px; }
+.textbox{ position: fixed; bottom: 0; width: 100%;  background-color: #fff;  border-top:1px #ddd solid;    left: 0;    padding: 8px; }
+.textbox input{width: 90%;border: 1px #ddd solid;padding: 5px;}
+.laoshi .nairong{ background-color: #ffd633; }
+.laoshi .nairong .triangle-left{border-right: 10px solid #ffd633;}
+.textbox .send{    font-size: 16px;    border: 1px #ddd solid;    padding: 6px 0;    border-radius: 3px;    background-color: #ddd;    color: #fff;}
+</style>
+
   <div class="buttons-tab fixed-tab" data-offset="44">
     <a href="#tab1" class="tab-link active button">课堂交流</a>
     <a href="#tab2" class="tab-link button">在线<span class="talkp">1</span>人</a>
   </div>
   <div class="tabs">
-      <div id="tab1" class="tab active">
-        <center style="margin: 20px auto">暂无互动</center>
-        <div class="nishuo laoshi">
+      <div id="tab1" class="tab active chat-messages">
+
+        <center style="margin: 20px auto" id="live_nofayan">暂无互动</center>
+        <!-- <div class="nishuo laoshi">
             <img src="/images/avatar.png" class="touxiang" />
             <div class="name">老师 12:20</div>
             <div class="nairong">
@@ -119,12 +124,11 @@
                 <span class="triangle-left"></span>
                 <span>哇哈哈哈哈哈哈！</span>
             </div>
-        </div>
-
-       <div class="textbox">
-         <input type="text" name="" placeholder="请输入要说的话">
-         <i class="iconfont icon-fasong send" onclick="AddFaYan()"></i>
-       </div>
+        </div> -->
+      </div>
+      <div class="textbox">
+        <input type="text" name="" id="fayantxt" placeholder="请输入要说的话">
+        <i class="iconfont icon-fasong send" onclick="AddFaYan()"></i>
       </div>
       <div id="tab2" class="tab">
        <div class="list-block" style="margin: 0.75rem 0;">

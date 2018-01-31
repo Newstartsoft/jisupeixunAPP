@@ -611,10 +611,34 @@ function bofang(xiaojie) {
     case '6':
     case 6:
         //直播类型
-        $.confirm("本章节为直播课程，是否观看直播？", function () {
-          SetlocalStorage("LiveBroadcast_Info", JSON.stringify(xiaojie));  //将信息存入缓存，以便直播界面直接获取使用
-          $.router.loadPage("../../html/peixun/live.html?arrangeId="+QueryString("arrangeId"));
-        });
+        var myDate = new Date();//获取系统当前时间
+        var usersysdate=myDate.getFullYear()+"-"+myDate.getMonth()+1+"-"+myDate.getDate()+" "+myDate.getHours()+":"+myDate.getMinutes()+":"+myDate.getSeconds();
+        console.log(xiaojie.CSSTIME+"||"+usersysdate);
+        var livetimeout=GetDateDiff(xiaojie.CSSTIME,usersysdate,"hour");
+        console.log(livetimeout);
+    		if (parseInt(livetimeout)>=4) {
+    			$.confirm("直播已经结束，点击确定立即前往观看回放？", function () {
+            var huifangUrl = xiaojie.liveObj.luzhi_url+"?f=app&uname="+encodeURI(encodeURI(getUserInfo().user_Name))+"&uid="+getUserInfo().user_ID;
+            console.log(huifangUrl);
+            api.openWin({
+                name: '直播回放',
+                animation:{
+                    type:"flip",                //动画类型（详见动画类型常量）
+                    subType:"from_right",       //动画子类型（详见动画子类型常量）
+                    duration:300                //动画过渡时间，默认300毫秒
+                },
+                url: huifangUrl,
+                pageParam: {
+                    name: '直播回放'
+                }
+            });
+    			});
+    		}else{
+          $.confirm("本章节为直播课程，是否观看直播？", function () {
+            SetlocalStorage("LiveBroadcast_Info", JSON.stringify(xiaojie));  //将信息存入缓存，以便直播界面直接获取使用
+            $.router.loadPage("../../html/peixun/live.html?arrangeId="+QueryString("arrangeId"));
+          });
+    		}
         break;
     case '8':
     case 8:
@@ -1181,11 +1205,11 @@ var mainplayer = function(Cantent, Height, mima) {
 
 
 //封装百度播放器
-bPlayer = api.require('bPlayer');  //实例化百度播放器
 var BaiDuPlayer = new function(){
 try{
   //播放
   this.play = function (Cantent, Height, mima){
+    bPlayer = api.require('bPlayer');  //实例化百度播放器
     var systemType = api.systemType;
     if(systemType == 'ios'){
       bPlayer.open({
@@ -1537,4 +1561,33 @@ function huancunxiazai() {
  }else{
    $.toast("文件下载为空！");
  }
+}
+//对比时间
+function GetDateDiff(startTime, endTime, diffType) {
+    //将xxxx-xx-xx的时间格式，转换为 xxxx/xx/xx的格式
+    startTime = startTime.replace(/\-/g, "/");
+    endTime = endTime.replace(/\-/g, "/");
+    //将计算间隔类性字符转换为小写
+    diffType = diffType.toLowerCase();
+    var sTime = new Date(startTime);      //开始时间
+    var eTime = new Date(endTime);  //结束时间
+    //作为除数的数字
+    var divNum = 1;
+    switch (diffType) {
+    	case "second":
+    	divNum = 1000;
+    	break;
+    	case "minute":
+    	divNum = 1000 * 60;
+    	break;
+    	case "hour":
+    	divNum = 1000 * 3600;
+    	break;
+    	case "day":
+    	divNum = 1000 * 3600 * 24;
+    	break;
+    	default:
+    	break;
+    }
+    return parseInt((eTime.getTime() - sTime.getTime()) / parseInt(divNum));
 }

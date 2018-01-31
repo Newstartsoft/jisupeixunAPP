@@ -14,9 +14,11 @@
     <script src="res/loginCheck.js" type="text/javascript"></script>
     <script type="text/javascript">
         //loginCheck();
-        api.setStatusBarStyle({
-            style: '#fff'
-        });
+        try{
+          api.setStatusBarStyle({
+              style: '#fff'
+          });
+        }catch(e){}
     </script>
 </head>
 <body>

@@ -288,7 +288,7 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         $("#username").val(sysUserInfo.user_Account);
         $("#userpwd").val(sysUserInfo.user_Pwd);
         document.title = sysUserInfo.organization_Name;
-        window.location.href = "html/home.html#xuexi";
+        window.location.href = "html/home.html#course";
     }
     //登录按钮
     $(document).on('click', '#login_btn', function () {
@@ -376,7 +376,7 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                             //放入缓存
                             SetlocalStorage("userinfo", JSON.stringify(retobj.data));
                             document.title = sysUserInfo.organization_Name;
-                            window.location.href = "html/home.html#xuexi";
+                            window.location.href = "html/home.html#course";
                     });
                 } else if (users.data.userstate == "1") {
                      error_login("帐号已冻结");
@@ -1362,9 +1362,9 @@ $(document).on('click','.create-actions', function () {
                addfolder(value,parentid);
           },null,'新建文件夹');
           $(".modal-inner input").attr("placeholder","新建文件夹");
-      if($(".modal-inner input").val()=="新建文件夹"){
-        $(".modal-inner input").val("");
-      }
+          if($(".modal-inner input").val()=="新建文件夹"){
+            $(".modal-inner input").val("");
+          }
         }
       }
     ];
@@ -2707,7 +2707,7 @@ $(document).on("pageInit", "#livedetail", function(e, id, $page) {
     var roomid = liveInfoObj.roomid;
     var rtmpUrl = liveInfoObj.playrmtpurl;
     var luzhi_url = liveInfoObj.luzhi_url; //回放地址
-    BaiDuPlayer.play("","", rtmpUrl);
+    BaiDuPlayer .play("","", rtmpUrl);
     flashvars = {
         rooid: "",
         rid: roomid,
@@ -3245,16 +3245,17 @@ console.log(e);
 }
 
 
-
 //发言
 function AddFaYan(){
   var data = JSON.stringify({
        dataType: 'MESSAGE',
-       dataContent: "messageStr",
+       dataContent: $("#fayantxt").val(),
        username: flashvars.name,
        userid: flashvars.id,
        livetiem: new Date().getTime(),
-       usertype: flashvars.type
+       usertype: flashvars.type,
+       userimg:flashvars.user_img
    });
    Messaging.publish(flashvars.rid, data);
+   $("#fayantxt").val("");
 }
