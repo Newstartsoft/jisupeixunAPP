@@ -1,0 +1,124 @@
+<html>
+<head>
+  <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>课程播放界面</title>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="../../res/css/light7.min.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="../../res/icon/iconfont.css">
+    <script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
+    <script type='text/javascript' src="../../res/socket.js"></script>
+    <script type='text/javascript' src="../../res/Function4.0.js"></script>
+    <style type="text/css">
+    .shanguang{width: 50%;height: 5rem;overflow: hidden;position: relative; margin: 3rem auto; text-align: center;}
+    .shanguang img{max-width: 210px; width: 100%;}
+    .shanguang .baiguang{position: absolute;width: 3rem;height: 3rem;top: 0;
+                left: -5rem;overflow: hidden;background-image: linear-gradient(to right,rgba(255,255,255,.2) 0,rgba(255,255,255,.5) 50%,rgba(255,255,255,.2) 100%);/*linear-gradient渐变效果*/
+                transform: skewX(-25deg);/*沿x轴倾斜*/
+                animation: shanguang 3s;
+                animation-iteration-count:1000;}
+     @keyframes shanguang {
+                from { left: -5rem;}
+                to { left: 18rem;}
+     }
+    .keshow{background: #313131;background:-moz-linear-gradient(top, #313131,  #3d3d3d);background:-webkit-gradient(linear, 0 0, 0 bottom, from(#313131), to(#3d3d3d));}
+    h2{ border-bottom: 1px #ddd solid;margin:0.5rem 0; padding: 0.5rem 0;}
+    #renwu_detail .jisuvideo{height: 10rem;}
+</style>
+</head>
+<body class="tabbar-hidden" onload="Messaging.initMsg();"><!--class="theme-dark" 开启夜间模式-->
+<!--系统第一部分，界面组-->
+ <div class="page-group">
+  <!--单个界面，如果多个界面page-current代表默认显示的-->
+ <div class="page page-current no-tabbar" id="livedetail">
+  <!--界面标题-->
+  <header class="bar bar-nav theme-dark" style="background: #313131">
+        <a class="button button-link button-nav pull-left " onclick="live_detail_black()">
+                  <i class="iconfont icon-shangyiye2"></i></a>
+        <a class="icon pull-right iconfont icon-gengxin1" style="color: #fff" onclick="tongbu()">
+        </a>
+        <h1 class="title" id="livename">课程的名字</h1>
+    </header>
+<!--课程展示区-->
+<div class="bar bar-header-secondary theme-dark keshow jisuvideo" style="padding: 0;overflow-y:auto;"
+ id="kecheng_play_mian_top_play">
+ 	<div class="shanguang">
+        <img src="../res/img/logo_fff.png" alt="加载中..."  />
+        <div class="baiguang"></div>
+    </div>
+</div>
+<!--界面内容-->
+<div class="content" id="kechengContent" style="top: 12rem">
+  <div class="buttons-tab fixed-tab" data-offset="44">
+    <a href="#tab1" class="tab-link active button">课堂交流</a>
+    <a href="#tab2" class="tab-link button">在线(1)人</a>
+  </div>
+  <div class="tabs">
+      <div id="tab1" class="tab active">
+        <div class="list-block">
+            <ul class="list-container">
+              <li>
+                <div class="content-block-title">简单卡片<span class="pull-right">2014-12-</span></div>
+                    <div class="card">
+                      <div class="card-content">
+                        <div class="card-content-inner">这是一个用纯文本的简单卡片。但卡片可以包含自己的页头，页脚，列表视图，图像，和里面的任何元素。</div>
+                      </div>
+                    </div>
+              </li>
+            </ul>
+        </div>
+<div style=" position:fixed; bottom:0px; width:100%;">
+        <input type="text" id="fayan" /><button class="btn default-btn" onclick="AddFaYan()">发言</button>
+      </div>
+      </div>
+      <div id="tab2" class="tab">
+       <div class="list-block" style="margin: 0.75rem 0;">
+			    <ul>
+            <li class="item-content">
+              <div class="item-media"><img src="../../res/img/avatar.png" style='width: 2.2rem;border-radius:50%'></div>
+              <div class="item-inner">
+                <div class="item-title">刘德华</div>
+                <div class="item-after">【讲师】</div>
+              </div>
+            </li>
+            <li class="item-content">
+              <div class="item-media"><img src="../../res/img/avatar.png" style='width: 2.2rem;border-radius:50%'></div>
+              <div class="item-inner">
+                <div class="item-title">刘德华</div>
+                <div class="item-after">【讲师】</div>
+              </div>
+            </li>
+            <li class="item-content">
+              <div class="item-media"><img src="../../res/img/avatar.png" style='width: 2.2rem;border-radius:50%'></div>
+              <div class="item-inner">
+                <div class="item-title">刘德华</div>
+                <div class="item-after">【讲师】</div>
+              </div>
+            </li>
+			    </ul>
+			  </div>
+      </div>
+
+
+</div>
+
+</div>
+<!--page1结束-->
+</div>
+<script type='text/javascript' src='../../res/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='../../res/js/light7.min.js' charset='utf-8'></script>
+<script type="text/javascript" src='../../res/pdf2/pdf.js' charset='urf-8'></script>
+<script type="text/javascript" src='../../res/pdf2/Base64.js' charset='urf-8'></script>
+<script type='text/javascript' src='../../res/js/light7-swiper.min.js' charset='utf-8'></script>
+<script type='text/javascript' src="http://180.76.156.234:9187/resources/ckplayer/ckplayer.js"></script>
+<script src="../../res/js/jquery-1.10.2.min.js" type="text/javascript"></script>
+<!-- <link href="../../res/webuploader/css/webuploader.css" rel="stylesheet" type="text/css" />
+<script src="../../res/webuploader/js/webuploader.min.js" type="text/javascript"></script> -->
+
+<script type='text/javascript' src="../../res/jisupeixun.js"></script>
+
+</body>
+</html>

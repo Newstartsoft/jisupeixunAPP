@@ -4,7 +4,8 @@
         极速培训系统是新启科技2017年全新上线的新一代培训平台及软件，新启通过多年行业积累，服务数千家企业的实践摸索，从新设计了培训管理体系，功能更强大，细节更完善，同时具有 非常强大的复杂能力，是搭建平台类大型应用的不二之选。
     </description>
     <author email="admin@newstartsoft.com" href="http://www.jisupeixun.com">        极速培训    </author>
-      <content src="login.html" />
+      <content src="html/home.html" />
+
     <access origin="*" />
     <preference name="pageBounce" value="false"/>
 	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>

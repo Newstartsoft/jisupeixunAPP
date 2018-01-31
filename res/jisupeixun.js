@@ -2,6 +2,23 @@
 //*************************************************
 //全局界面切换监听
 //*************************************************
+var flashvars = { rooid: "imo0q7jzbc8jkde40u",
+          /* url: 'rtmp://push.bj.bcelive.com/live/', */
+          rid: 'd88119fb-d35b-4ae1-a2ed-eaa6d00ab05f',
+          rtmpVideo: '',
+          name: '学员3',
+          id: '48f3889c-af8d-401f-ada2-c383031af923',
+          type: 1,
+          record: 'false',
+          bookname: "fff",
+          data: "2016-5-31 18:36:33",
+          createuserName: "",
+          teacherid: "f8b1ceea-f526-4639-95c5-31627b323e52",
+          ms: "v"    //v 声音 s 视频
+      };
+      var roleId = flashvars.type; // 1、学生 0、老师
+             var CHATROOM_TOPIC = flashvars.rid;
+     		var tempHtml="";
 var javaserver = "http://180.76.156.234:9187";
 var javafile = "http://file.jisupeixun.com";//文件上传接口
 var systemTitle="极速培训";
@@ -544,8 +561,6 @@ function renwuinit() {
             }
         });
 
-     //下拉刷新处理(重新查询绑定)
-  FreshRW(nowState, pageIndex, pageSize);
   /*********************************初始化分页查询**************************************/
   function initPage(state){
        $.showIndicator();//loading
@@ -728,8 +743,13 @@ function renwu_detail_black(){
     console.log("课程播放界面后退");
     try{bPlayer.close();}catch(e){}
     $.router.back("../peixun/info.html?arrangeId="+QueryString("arrangeId"));
-    //关闭播放器
-    //$(".title").html("任务");
+}
+//直播后退事件
+function live_detail_black(){
+    $.showIndicator(); //loading
+    console.log("直播界面后退");
+    try{bPlayer.close();}catch(e){}
+    $.router.back("../peixun/detail.html?arrangeId="+QueryString("arrangeId"));
 }
 
 //**********************************************************************
@@ -2696,11 +2716,27 @@ sysUserInfo=getUserInfo();
    });
 
 })
-   /******************************************查询方法结束*************************************************/
+
+/**********直播界面初始化***********/
+$(document).on("pageInit", "#livedetail", function(e, id, $page) {
+    var livedata = GetlocalStorage("LiveBroadcast_Info");
+    //var roomPwd =livedata.content.liveobj.roomid;
+    var liveName = livedata.CSNAME;
+    var liveStartTime = livedata.CSSTIME;  //直播开始时间
+    $("#livename").text(liveName);  //直播名称
+    var liveInfoObj = livedata.liveObj;
+    var roomid = liveInfoObj.roomid;
+    var rtmpUrl = liveInfoObj.playrmtpurl;
+    console.log(rtmpUrl);
+    BaiDuPlayer.play("","", rtmpUrl);
+    setTimeout(function () {
+      Messaging.initMsg();
+      $.init();
+    }, 10000);
+});
+/******************************************查询方法结束*************************************************/
 //====================公共方法===========================
-/*
-获取格式化后文件大小
-*/
+/*获取格式化后文件大小*/
 function getFileSize(byteSize) {
     if (byteSize != undefined) {
         if (byteSize === 0) return '0 KB';
@@ -3215,4 +3251,20 @@ console.log(e);
 } finally {
 
 }
+}
+
+
+
+//发言
+function AddFaYan(){
+
+  var data = JSON.stringify({
+         dataType: 'MESSAGE',
+       dataContent: "messageStr",
+       username: flashvars.name,
+       userid: flashvars.id,
+       livetiem: new Date().getTime(),
+       usertype: flashvars.type
+   });
+   Messaging.publish(CHATROOM_TOPIC, data);
 }

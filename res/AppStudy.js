@@ -9,26 +9,43 @@ function openSj(data,arrangeId) {
   }catch(e){}
     sysUserInfo=getUserInfo();
     //历史试卷
+    var gotoUrl = "";
     if(arrangeId==99||arrangeId=="99"){
         //随机卷
         if(data.exampaper.paper_Random == "0"){
-            window.location.href =javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            //window.location.href =javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?f=app&userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            gotoUrl = javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?f=app&userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
        //固定卷
         }else{
-            window.location.href =javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            //window.location.href =javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&f=app&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            gotoUrl = javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&f=app&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
         }
     //打开试卷
     }else{
         //随机卷
         if(data.paper_Random == "0"){
              data.url =  getPaperUrl(data.url,data.paperCount)
-             window.location.href =javafile+data.url+"&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+             //window.location.href =javafile+data.url+"&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+             gotoUrl = javafile+data.url+"&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
          }else{
-            window.location.href =javafile+data.url+"?random=0&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
-         }
-
+            //location.href =javafile+data.url+"?random=0&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            gotoUrl = javafile+data.url+"?random=0&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+        }
     }
-
+    if(gotoUrl != ""){
+      api.openWin({
+          name: 'kaoshi',
+          animation:{
+              type:"flip",                //动画类型（详见动画类型常量）
+              subType:"from_right",       //动画子类型（详见动画子类型常量）
+              duration:300                //动画过渡时间，默认300毫秒
+          },
+          url: gotoUrl,
+          pageParam: {
+              name: '考试'
+          }
+      });
+    }
 }
 //打开题库
 function openTi(obj){
@@ -590,6 +607,14 @@ function bofang(xiaojie) {
 		}
         // 线下授课类型
         playTeachingOffline("playText", xiaojie);
+        break;
+    case '6':
+    case 6:
+        //直播类型
+        $.confirm("本章节为直播课程，是否观看直播？", function () {
+          SetlocalStorage("LiveBroadcast_Info", JSON.stringify(xiaojie));  //将信息存入缓存，以便直播界面直接获取使用
+          $.router.loadPage("../../html/peixun/live.html?arrangeId="+QueryString("arrangeId"));
+        });
         break;
     case '8':
     case 8:
@@ -1174,7 +1199,7 @@ try{
             autoPlay: true
         }, function(ret, err) {
             if (ret) {
-              bPlayer.full();
+
             }
       });
       BDPlayerLoader();
