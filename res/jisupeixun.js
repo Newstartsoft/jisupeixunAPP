@@ -174,12 +174,13 @@ $("#stuInfo_m").click(function(){
     }
 });
 $("#course_m").click(function(){
-
     if(isWeiXin()){
         $("title").html("公开课");
     }else{
         $(".title").html("公开课");
     }
+    $("#publicCourseName").val("");
+    goPublicCourse();
 })
 
 //判断是否是企业微信
@@ -566,9 +567,12 @@ function renwuinit() {
 //打开任务详情界面触发
 //**********************************************************************
 $(document).on("pageInit", "#renwu_info", function (e, id, $page) {
-
     sysoUserInfo = getUserInfo(); //用户信息
-    var arrangeId = QueryString("arrangeId")//任务id
+    var renwuObj = strToJson(GetlocalStorage("renwuobj"));
+    if(renwuObj==null){
+        return;
+    }
+    var arrangeId = renwuObj.id//任务id
     var completeStr = "";
     //获取单个任务的已完成课程、试卷、的id
     getAjax(javaserver + "/stage/findOneProgress", { arrangeId: arrangeId, userId: sysoUserInfo.user_ID }, function (data) {
@@ -578,143 +582,136 @@ $(document).on("pageInit", "#renwu_info", function (e, id, $page) {
             completeStr = data.data.json_details;
         }
     });
-    //获取单个任务对象
-    getAjax(javaserver + "/stage/findArrangeById", { arrangeId: arrangeId }, function (data) {
-        data = strToJson(data);
-
-         if(isWeiXin()){
-            $("title").html(data.data.name);
-        }else{
-            if(data.data.name.length>12){
-                $(".title").html(data.data.name.substr(0,12)+"...");
-            }else{
-                $(".title").html(data.data.name);
-            }
-        }
-        if (data.errorcode == 0 && data.data != null) {
-            var block = "";
-            data.data.arragetype = strToJson(data.data.arragetype);
-            //遍历阶段
-            for (var i = 0; i < data.data.arragetype.length; i++) {
-                block = "  <div class='content-block-title'>第" + data.data.arragetype[i].key + "阶段</div><div class='list' id='index_" + i + "'>正在读取中</div>";
-                $("#content_xq").append(block);
-                findInArrange(data.data.arragetype[i], i);
-            }
-            if(isWeiXin){
-                $("#content_xq").find(".content-block-title").css("margin","0.75rem .75rem .5rem !important");
-            }
-        }
-    });
-
-    //遍历arrangeType  json 获取json
-    //取出json里的课程ids  试卷ids  文件ids  知识架构ids进行查询
-    //item  任务的单个阶段的json
-    //返回html代码
-    function findInArrange(item, xx) {
-        $.showIndicator(); //loading
-        var courseids = "";
-        var paperids = "";
-        var upids = "";
-        var knowledgeids ="";
-        var userid = sysoUserInfo.user_ID;
-        //遍历课程获取id
-        for (var i = 0; i < item.kscList.length; i++) {
-            courseids += item.kscList[i].course_Id + ",";
-        }
-        //遍历试卷
-        for (var i = 0; i < item.kseList.length; i++) {
-            paperids += item.kseList[i].paperId + ",";
-        }
-        //遍历文件
-        for (var i = 0; i < item.ksfList.length; i++) {
-            upids += item.ksfList[i].upId + ",";
-        }
-        var knowledgeBlock="";
-        //遍历知识架构
-        for (var i = 0; i < item.kssList.length; i++) {
-            //knowledgeids += item.kssList[i].knowledge_Id + ",";
-            //需要判断该知识架构是否包含课程、试卷、题库
-            //如果有题库，直接算1个快
-             var objknow={};
-             var knowId="";
-             var type="";
-             //有题库
-            if(item.kssList[i].know_select_que!=undefined&&item.kssList[i].know_select_que){
-                //把知识架构放入对象  前端拼接
-                 if (completeStr != null && completeStr != "" && (completeStr.indexOf(item.kssList[i].knowledge_Id) != -1 || completeStr == item.kssList[i].knowledge_Id)) {
-                    knowledgeBlock += "<a href='#' onClick='openTi(" + JSON.stringify(item.kssList[i]) + ")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='../../images/train/quenull.png' alt='' onerror='javascript:this.src=\"../../images/train/quenull.png\"'></div><div class='card-content'><div class='card-content-inner'><p>" + item.kssList[i].knowledge_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 题库练习</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
-                }else{
-                    knowledgeBlock += "<a href='#' onClick='openTi(" + JSON.stringify(item.kssList[i]) + ")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='../../images/train/quenull.png' alt='' onerror='javascript:this.src=\"../../images/train/quenull.png\"'></div><div class='card-content'><div class='card-content-inner'><p>" + item.kssList[i].knowledge_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 题库练习</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
-                }
-            }
-
-            //有课程1
-            if(item.kssList[i].know_select_course!=undefined&&item.kssList[i].know_select_course){
-                type="1";
-                knowId=item.kssList[i].knowledge_Id;
-            }
-             //有试卷2
-            if(item.kssList[i].know_select_exam!=undefined&&item.kssList[i].know_select_exam){
-                type+=type.length>0?",2":"2";
-                knowId=item.kssList[i].knowledge_Id;
-            }
-            //如果有课程  和  试卷
-            if(type.length>0&&knowId.length>0){
-                objknow={knowledgeId:knowId,type:type};
-                knowledgeids+=knowledgeids.length>0?",":""+JSON.stringify(objknow);
-            }
-
-        }
-        $("#index_" + xx).html(knowledgeBlock);
-        var block = "";
-        if(knowledgeids!=null||knowledgeids.length>0||courseids||paperids||upids){
-            //请求获取对象
-            getAjax(javaserver + "/stage/findArrangeStage", { courseids: courseids, paperids: paperids, upids: upids, knowledgeids: knowledgeids }, function (data) {
-                data = strToJson(data);
-                if (data.errorcode == 0 && data.datas.length > 0) {
-
-                    //遍历阶段
-                    for (var i = 0; i < data.datas.length; i++) {
-                        //课程 href='"+javaserver+"/resources/template/"+data.datas[i].courseId+".html?arrangeId="+arrangeId+"'
-                        if (data.datas[i].style == 1) {
-                            //data.datas[i].detailedJSON = data.datas[i].detailedJSON;
-                            //data.datas[i].detailedJSON = base64encode(data.datas[i].detailedJSON);
-                            data.datas[i].detailedJSON  = jisuEncode(data.datas[i].detailedJSON);
-                            var courimgMid = data.datas[i].courseImg;
-                            if(courimgMid.indexOf("http://") >= 0){
-                              courimgMid = "../.." + courimgMid;
-                            }
-                            if (completeStr != null && completeStr != "" && (completeStr.indexOf(data.datas[i].courseId) != -1 || completeStr == data.datas[i].courseId)) {
-                                block += "<a href='#' onClick='openKe(" + JSON.stringify(data.datas[i]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + courimgMid + "' alt='' onerror='javascript:this.src=\"../../res/img/fengmian001.gif\"' height=200></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].courseName + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 课程</span><span class='link'><i class='iconfont icon-listtable'>" + data.datas[i].courseSum + "章</i> </span></div></div></a>";
-                            } else {
-                                block += "<a href='#' onClick='openKe(" + JSON.stringify(data.datas[i]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + courimgMid + "' alt='' onerror='javascript:this.src=\"../../res/img/fengmian001.gif\"' height=200></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].courseName + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 课程</span><span class='link'><i class='iconfont icon-listtable'>" + data.datas[i].courseSum + "章</i> </span></div></div></a>";
-                            }
-                            //试卷
-                        } else if (data.datas[i].style == 2) {
-                            if (completeStr != null && completeStr != "" && (completeStr.indexOf(data.datas[i].paperId) != -1 || completeStr == data.datas[i].paperId)) {
-                                block += "<a href='#' onClick='openSj(" + JSON.stringify(data.datas[i]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='../../res/img/examnull.png'  alt='' ></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].paperName + "</p></div></div><div class='card-footer' style='display:none;'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 已学</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
-                            } else {
-                                block += "<a href='#' onClick='openSj(" + JSON.stringify(data.datas[i]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='../../res/img/examnull.png'  alt='' ></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].paperName + "</p></div></div><div class='card-footer' style='display:none;'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 已学</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
-                            }
-                            //文件(*预留)
-                        } else {
-                            block += "<a href='../html/peixun/detail.html'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + data.datas[i].filecover + "'  alt='' onerror='javascript:this.src=\"../../res/img/filenull.png\"'></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].fileName + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 文件</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
-                        }
-                    }
-
-                }
-                $("#index_" + xx).append(block);
-            });
-            $.hideIndicator();
-        }else {
-              if((!knowledgeBlock&&!block)){
-                $("#index_" + xx).html("暂无数据");
-              }
-        }
+    if(renwuObj.name.length>12){
+        $(".title").html(renwuObj.name.substr(0,12)+"...");
+    }else{
+        $(".title").html(renwuObj.name);
     }
 
-
+    var block = "";
+    renwuObj.arragetype = strToJson(renwuObj.arragetype);
+    //遍历阶段
+    for (var i = 0; i < renwuObj.arragetype.length; i++) {
+        var item=renwuObj.arragetype[i];
+        block += "  <div class='content-block-title'>第" + item.key + "阶段</div><div class='list'>";
+        //课程
+        for (var c= 0; c < item.kscList.length; c++) {
+                    //已完成
+                    if (completeStr != null && completeStr != "" && (completeStr.indexOf(item.kscList[c].course_Id) != -1 || completeStr == item.kscList[c].course_Id)) {
+                        block += "<a href='#' onClick='openKe_collection(" + JSON.stringify(item.kscList[c].course_Id) + ","+null+",\"" + arrangeId + "\")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + item.kscList[c].course_img + "' alt='' onerror='javascript:this.src=\"/app/framework/img/fengmian001.gif\"' height=200></div><div class='card-content'><div class='card-content-inner'><p>" + item.kscList[c].course_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 课程</span><span class='link'><i class='iconfont icon-listtable'>" + item.kscList[c].course_Sum + "章</i> </span></div></div></a>";
+                    } else {
+                        block += "<a href='#' onClick='openKe_collection(" + JSON.stringify(item.kscList[c].course_Id) + ","+null+",\"" + arrangeId + "\")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + item.kscList[c].course_img + "' alt='' onerror='javascript:this.src=\"../../res/img/fengmian001.gif\"' height=200></div><div class='card-content'><div class='card-content-inner'><p>" + item.kscList[c].course_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 课程</span><span class='link'><i class='iconfont icon-listtable'>" + item.kscList[c].course_Sum + "章</i> </span></div></div></a>";
+                    }
+        }
+        //试卷
+        for (var s = 0; s < item.kseList.length; s++) {
+                if (completeStr != null && completeStr != "" && (completeStr.indexOf(item.kseList[s].paperId) != -1 || completeStr == data.datas[i].paperId)) {
+                        block += "<a href='#' onClick='openSj(" + JSON.stringify(item.kseList[s]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='./../res/img/examnull.png'  alt='' ></div><div class='card-content'><div class='card-content-inner'><p>" + item.kseList[s].paperName + "</p></div></div><div class='card-footer' style='display:none;'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 已学</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+                } else {
+                        block += "<a href='#' onClick='openSj(" + JSON.stringify(item.kseList[s]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='../../res/img/examnull.png'  alt='' ></div><div class='card-content'><div class='card-content-inner'><p>" + item.kseList[s].paperName + "</p></div></div><div class='card-footer' style='display:none;'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 已学</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+                }
+        }
+        //遍历知识架构
+        for (var t = 0; t < item.kssList.length; t++) {
+                    item.kssList[t].completeStr=completeStr;
+                    //把知识架构放入对象  前端拼接
+                    if (completeStr != null && completeStr != "" && (completeStr.indexOf(item.kssList[t].knowledge_Id) != -1 || completeStr == item.kssList[t].knowledge_Id)) {
+                        block += "<a href='#' onClick='openRenwuKnow(" + JSON.stringify(item.kssList[t]) + ",\""+arrangeId+"\")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'> <svg class='icon' aria-hidden='true' style='margin-top:7px;'><use xmlns:xlink='http://www.w3.org/1999/xlink' xlink:href='"+item.kssList[t].ico+"'></use></svg></div><div class='card-content'><div class='card-content-inner'><p>" + item.kssList[t].knowledge_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 题库练习</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+                    }else{
+                        block += "<a href='#' onClick='openRenwuKnow(" + JSON.stringify(item.kssList[t]) + ",\""+arrangeId+"\")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'> <svg class='icon' aria-hidden='true' style='margin-top:7px;'><use xmlns:xlink='http://www.w3.org/1999/xlink' xlink:href='"+item.kssList[t].ico+"'></use></svg></div><div class='card-content'><div class='card-content-inner'><p>" + item.kssList[t].knowledge_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 题库练习</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+                    }
+        }
+        block += "  </div>";
+        $("#content_xq").append(block);
+    }
 });
+//**********************************************************************
+//打开分类详情界面触发0----进入分类
+//**********************************************************************
+$(document).on("pageInit", "#renwu_know", function (e, id, $page) {
+    sysoUserInfo = getUserInfo(); //用户信息
+    var arrangeId=QueryString("arrangeId");
+    var item = strToJson(GetlocalStorage("knowobj"));
+    if(item==null){
+        return;
+    }
+    var block="";
+    //有课程1
+    if(item.know_select_course!=undefined&&item.know_select_course){
+                block = "  <div class='content-block-title'>包含课程</div><div class='list' id='index_course'> 加载中。。。</div>";
+                $("#content_kn").append(block);
+                findInKnow(item,"1");
+     }
+     //有试卷2
+    if(item.know_select_exam!=undefined&&item.know_select_exam){
+                block = "  <div class='content-block-title'>包含试卷</div><div class='list' id='index_paper'>加载中。。。 </div>";
+                $("#content_kn").append(block);
+                findInKnow(item,"2");
+    }
+     //有题库
+    if(item.know_select_que!=undefined&&item.know_select_que){
+        block = "  <div class='content-block-title'>包含题库</div><div class='list'> </div>";
+        //把知识架构放入对象  前端拼接
+        if (item.completeStr != null && item.completeStr != "" && (item.completeStr.indexOf(item.knowledge_Id) != -1 || item.completeStr == item.knowledge_Id)) {
+            block += "<a href='#' onClick='openTi(" + JSON.stringify(item) + ")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='/images/train/quenull.png' alt='' onerror='javascript:this.src=\"/images/train/quenull.png\"'></div><div class='card-content'><div class='card-content-inner'><p>" + item.knowledge_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 题库练习</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+        }else{
+            block += "<a href='#' onClick='openTi(" + JSON.stringify(item) + ")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='/images/train/quenull.png' alt='' onerror='javascript:this.src=\"/images/train/quenull.png\"'></div><div class='card-content'><div class='card-content-inner'><p>" + item.knowledge_Name + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 题库练习</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+        }
+         block += "</div>";
+         $("#content_kn").append(block);
+    }
+    if(item.knowledge_Name.length>12){
+        $(".title").html(item.knowledge_Name.substr(0,12)+"...");
+    }else{
+        $(".title").html(item.knowledge_Name);
+    }
+    //查询知识架构下的课程，试卷，题库
+    function findInKnow(item, state) {
+        $.showIndicator(); //loading
+        getAjax(javaserver + "/stage/findArrangeStage", { knowledgeids: item.knowledge_Id, state: state }, function (data) {
+            data = strToJson(data);
+            if (data.errorcode == 0) {
+                //追加课程
+                if(state=="1"){
+                    var knowblock = "";
+                        //课程
+                        for (var i= 0; i < data.datas.length; i++) {
+                                    //已完成
+                                    if (item.completeStr != null && item.completeStr != "" && (item.completeStr.indexOf(data.datas[i].courseId) != -1 || item.completeStr == data.datas[i].courseId)) {
+                                        knowblock += "<a href='#' onClick='openKe_collection("  + JSON.stringify(data.datas[i].courseId)+","+null+","+ JSON.stringify(arrangeId)+ ")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + data.datas[i].courseImg + "' alt='' onerror='javascript:this.src=\"/app/framework/img/fengmian001.gif\"' height=200></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].courseName + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 课程</span><span class='link'><i class='iconfont icon-listtable'>" + data.datas[i].courseSum + "章</i> </span></div></div></a>";
+                                    } else {
+                                        knowblock += "<a href='#' onClick='openKe_collection("  + JSON.stringify(data.datas[i].courseId)+","+null+","+ JSON.stringify(arrangeId)+ ")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='" + data.datas[i].courseImg + "' alt='' onerror='javascript:this.src=\"/app/framework/img/fengmian001.gif\"' height=200></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[i].courseName + "</p></div></div><div class='card-footer'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 课程</span><span class='link'><i class='iconfont icon-listtable'>" + data.datas[i].courseSum + "章</i> </span></div></div></a>";
+                                    }
+                        }
+                        if(knowblock.length>0){
+                            $("#index_course").html(knowblock);
+                        }else{
+                            $("#index_course").html("<center>无课程</center>");
+                        }
+                }else{
+                     var knowblock = "";
+                     //试卷
+                        for (var s = 0; s < data.datas.length; s++) {
+                                if (item.completeStr != null && item.completeStr != "" && (item.completeStr.indexOf(data.datas[s].paperId) != -1 || item.completeStr == data.datas[s].paperId)) {
+                                        knowblock += "<a href='#' onClick='openSj(" + JSON.stringify(data.datas[s]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div class='shuqian-down'><span class='shuqian end'></span><span class='shuqiantext'>已完成</span></div><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='/app/framework/img/examnull.png'  alt='' ></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[s].paperName + "</p></div></div><div class='card-footer' style='display:none;'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 已学</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+                                } else {
+                                        knowblock += "<a href='#' onClick='openSj(" + JSON.stringify(data.datas[s]) + ",\"" + arrangeId + "\")'><div class='card color-default'><div style='' valign='bottom' class='card-header color-white no-border no-padding'><img class='card-cover' src='/app/framework/img/examnull.png'  alt='' ></div><div class='card-content'><div class='card-content-inner'><p>" + data.datas[s].paperName + "</p></div></div><div class='card-footer' style='display:none;'><span class='link'><i class='iconfont icon-shenhetongguo' style='color:#339966'></i> 已学</span><span class='link'><i class='iconfont icon-listtable'></i> </span></div></div></a>";
+                                }
+                        }
+                        if(knowblock.length>0){
+                            $("#index_paper").html(knowblock);
+                        }else{
+                            $("#index_paper").html("<center>无试卷</center>");
+                        }
+                }
+            }
+            $.hideIndicator();
+        });
+    }
+});
+
+
+
  //后退
 function renwu_info_black(){
     $.showIndicator(); //loading
@@ -1258,7 +1255,7 @@ $(document).on('infinite', '#orgfile',function() {
         },
         {
           text: '按文件上传时间倒序',
-          onClick: function() {
+          onClick: function(){
              if(fid==0||fid==undefined||fid==""){
                 getfilelist(fid,3,"","desc",2,pageSize,pageIndex,true);
              }else{
@@ -2266,7 +2263,6 @@ function goPublicCourse(){
             $(".title").html("公开课");
     }
     var courseName=$('#publicCourseName').val();
-
     $("#publicCourseNameParams").val(courseName);
     getPublicCourse(true);
 }
@@ -2807,7 +2803,6 @@ function getAjax(url, parm, callBack, callBackError, callBackType, mode,istongbu
         mode = "get";
     if (istongbu == null || istongbu == "" || istongbu == undefined)
         istongbu =true;
-
   try{
       $.ajax({
           type: mode,
@@ -2889,7 +2884,8 @@ function getrenwuList(state,optype, pageIndex, pageSize){
                               center="<div class='item-after'><i class='iconfont icon-icon27' title='学习中' style='color:#39f'></i></div>";
                           }
                           //追加的任务列表
-                          renwu+="<li> <a href='../html/peixun/info.html?arrangeId="+data.datas[i].id+"' class='item-link item-content'> <div class='item-inner'><div class='item-title'>"+data.datas[i].name+"</div>"+center+" </div></a> </li>";
+                          //renwu+="<li> <a href='../html/peixun/info.html?arrangeId="+data.datas[i].id+"' class='item-link item-content'> <div class='item-inner'><div class='item-title'>"+data.datas[i].name+"</div>"+center+" </div></a> </li>";
+                          renwu+="<li> <a onclick='openRenwuDetail("+JSON.stringify(data.datas[i])+")'  target='_black' class='item-link item-content'> <div class='item-inner'><div class='item-title'>"+data.datas[i].name+"</div>"+center+" </div>  </a> </li>";
                       }
                       //给页面附上列表
                       if(optype==1){
@@ -3145,6 +3141,12 @@ function GetConnectionType(){
   if(connectionT == "none"){  //无网络链接
     $.toast('当前网络不可用，请检查网络设置！');
   }
+}
+//打开任务详情
+function openRenwuDetail(stringjson) {
+    //console.log("预览文件");
+    SetlocalStorage("renwuobj", JSON.stringify(stringjson));
+    $.router.loadPage("../html/peixun/info.html");
 }
 //打开文件预览
 function openfile(stringjson) {

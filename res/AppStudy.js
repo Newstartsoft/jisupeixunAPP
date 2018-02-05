@@ -518,16 +518,24 @@ function bofang(xiaojie) {
                               qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
                         }else if($(".videotypelist li[class='GQ']").eq(0).length > 0){
                               okayUrl = $(".videotypelist li[class='GQ']").eq(0).attr("data");
-                             qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              if(qxd == ""){
+                                qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              }
                         }else if($(".videotypelist li[class='CQ']").eq(0).length > 0){
                               okayUrl = $(".videotypelist li[class='CQ']").eq(0).attr("data");
-                             qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              if(qxd == ""){
+                                qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              }
                         }else if($(".videotypelist li[class='LG']").eq(0).length > 0){
                               okayUrl = $(".videotypelist li[class='LG']").eq(0).attr("data");
-                              qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              if(qxd == ""){
+                                qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              }
                         }else if($(".videotypelist li[class='bendi']").eq(0).length > 0){
                               okayUrl = $(".videotypelist li[class='bendi']").eq(0).attr("data");
-                              qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              if(qxd == ""){
+                                qxd =  $(".videotypelist li[class='BQ']").eq(0).text();
+                              }
                         }
                         else
                         {
