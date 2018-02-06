@@ -289,13 +289,12 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         $("#username").val(sysUserInfo.user_Account);
         $("#userpwd").val(sysUserInfo.user_Pwd);
         document.title = sysUserInfo.organization_Name;
-        window.location.href = "html/home.html#course";
+        window.location.href = "/html/home.html#xuexi";
     }
     //登录按钮
     $(document).on('click', '#login_btn', function () {
         var useraccount = $("#username").val();
         var userpwd = $("#userpwd").val();
-
         //登录
         login(useraccount,userpwd)
     });
@@ -307,7 +306,6 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         isPlayer = true;
         error_login('登录中','#0894ec');
         getAjax(javaserver + "/ApiUser/login",{ useraccount: username, userpwd: pwd },function (users) {
-            error_login('登录完成','#0894ec');
             isPlayer = false;
             users = strToJson(users);
             //用户登录错误次数 >5 <10 显示验证码 ，>10 锁定帐号
@@ -345,9 +343,10 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                     error_login("账号或密码错误, 请重新输入");
                 }
             } else if (users.errorcode == "0") {
+                error_login('登录完成','#0894ec');
                 SetlocalStorage("userinfo_token", users.token);
+                console.log("asdfasdf123");
                 if (users.data.userstate == "0") {
-
                     getAjax(javaserver + "/PersonnelManagement/PersonnelGetKey", { user_ID: users.data.userId }, function (retobj) {
                         retobj = strToJson(retobj);
                         if (retobj.errorcode == 0) {
@@ -358,26 +357,27 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                             }
                             sysUserInfo = retobj.data;
                         }
-//                           //账号来源 控制样式
-//                          if(sysUserInfo.userOrgList[0].orgSource&&sysUserInfo.userOrgList[0].orgSource==2){
-//                            //该账号来源 --企业微信
-//                            SetlocalStorage("resource", "2");
-//                          }else{
-//                            SetlocalStorage("resource", "0");
-//                          }
-                            getParam();
-                            //id
-                            retobj.data.allorgid = allorgid;
-                            retobj.data.allgroupid = allgroupid;
-                            retobj.data.allroleid = allroleid;
-                            //名称
-                            retobj.data.allorgname = allorgname;
-                            retobj.data.allgroupname = allgroupname;
-                            retobj.data.allrolename = allrolename;
-                            //放入缓存
-                            SetlocalStorage("userinfo", JSON.stringify(retobj.data));
-                            document.title = sysUserInfo.organization_Name;
-                            window.location.href = "html/home.html#course";
+                        getParam();
+                        //id
+                        retobj.data.allorgid = allorgid;
+                        retobj.data.allgroupid = allgroupid;
+                        retobj.data.allroleid = allroleid;
+                        //名称
+                        retobj.data.allorgname = allorgname;
+                        retobj.data.allgroupname = allgroupname;
+                        retobj.data.allrolename = allrolename;
+                        //放入缓存
+                        SetlocalStorage("userinfo", JSON.stringify(retobj.data));
+
+                        document.title = sysUserInfo.organization_Name;
+                        //window.location.href = "html/home.html";
+                        winapi.openWin({
+                            name: 'home',
+                            url: 'html/home.html',
+                            pageParam: {
+                                name: 'home'
+                            }
+                        });
                     });
                 } else if (users.data.userstate == "1") {
                      error_login("帐号已冻结");
@@ -389,15 +389,10 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
             }
         });
         }
-
 });
 
 function nofunction(){
-//  alert("a");
-
     $.toast('暂未开放！');
-
-
 }
 //**********************************************************************
 //首页的加载
@@ -440,38 +435,38 @@ $(document).on("pageInit", "#xuexi", function (e, id, $page,window) {
    });
    //请求最近学习的前三个课程记录
    getAjax(javaserver + "/exampaper/studyCourseTopThree",{userid: sysUserInfo.user_ID }, function (data) {
-                        data = strToJson(data);
-                        if (data.errorcode == 0 ) {
-                            var block="";
-                           for(var i=0;i<data.datas.length;i++){
-                                block+="<div class='lishi_div' onClick='openKe_collection(" + JSON.stringify(data.datas[i].courseId)+","+null+","+ JSON.stringify(data.datas[i].arrangeId)+ ")'><div class='shuqian-down'>";
-                                //已完成
-                                if(data.datas[i].learningProgress=="100.00%"){
-                                    block+="<span class='shuqian  end' ></span><span class='shuqiantext'>已完成</span>";
-                                //未开始
-                                }else if(data.datas[i].learningProgress=="00.00%"){
-                                    block+="<span class='shuqian  start' ></span><span class='shuqiantext'>未开始</span>";
-                                //进行中
-                                }else{
-                                    block+="<span class='shuqian  ing' ></span><span class='shuqiantext'>进行中</span>";
-                                }
-                                if(data.datas[i].courseImg.indexOf("/images/train") >= 0){
-                                block+="</div><img  src='.."+data.datas[i].courseImg+"' height=124  width=220 /><span class='cstitle'>"+data.datas[i].courseName+"（"+(data.datas[i].arrangeId&&data.datas[i].arrangeId==1?'公开课':'任务')+"）</span></div>";
-                              }else {
-                                {
-                                  block+="</div><img  src='"+data.datas[i].courseImg+"' height=124  width=220 /><span class='cstitle'>"+data.datas[i].courseName+"（"+(data.datas[i].arrangeId&&data.datas[i].arrangeId==1?'公开课':'任务')+"）</span></div>";
-                                }
-                              }
-                           }
-                                if(block!=""){
-                                        $(".lishi").show();
-                                        $("#historyStudy").html(block);
-                                 }else{
-                                        $(".lishi").hide();
-                                 }
-                        }  else {
-                            $.toast('请求错误！');
-                        }
+        data = strToJson(data);
+        if (data.errorcode == 0 ) {
+            var block="";
+           for(var i=0;i<data.datas.length;i++){
+                block+="<div class='lishi_div' onClick='openKe_collection(" + JSON.stringify(data.datas[i].courseId)+","+null+","+ JSON.stringify(data.datas[i].arrangeId)+ ")'><div class='shuqian-down'>";
+                //已完成
+                if(data.datas[i].learningProgress=="100.00%"){
+                    block+="<span class='shuqian  end' ></span><span class='shuqiantext'>已完成</span>";
+                //未开始
+                }else if(data.datas[i].learningProgress=="00.00%"){
+                    block+="<span class='shuqian  start' ></span><span class='shuqiantext'>未开始</span>";
+                //进行中
+                }else{
+                    block+="<span class='shuqian  ing' ></span><span class='shuqiantext'>进行中</span>";
+                }
+                if(data.datas[i].courseImg.indexOf("/images/train") >= 0){
+                block+="</div><img  src='.."+data.datas[i].courseImg+"' height=124  width=220 /><span class='cstitle'>"+data.datas[i].courseName+"（"+(data.datas[i].arrangeId&&data.datas[i].arrangeId==1?'公开课':'任务')+"）</span></div>";
+              }else {
+                {
+                  block+="</div><img  src='"+data.datas[i].courseImg+"' height=124  width=220 /><span class='cstitle'>"+data.datas[i].courseName+"（"+(data.datas[i].arrangeId&&data.datas[i].arrangeId==1?'公开课':'任务')+"）</span></div>";
+                }
+              }
+           }
+                if(block!=""){
+                        $(".lishi").show();
+                        $("#historyStudy").html(block);
+                 }else{
+                        $(".lishi").hide();
+                 }
+        }  else {
+            $.toast('请求错误！');
+        }
    });
 });
 
