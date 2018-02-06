@@ -181,7 +181,11 @@ $("#course_m").click(function(){
     }
     $("#publicCourseName").val("");
     goPublicCourse();
-})
+});
+$("#course_make").click(function(){
+    $(".title").html("课件录制");
+    window.location.href = "../ckt/ckt.html?callback=http://180.76.156.234:9187/Kapi/AddEditURLCollection&type=0&key=774691d9f133ecea1192250439ec297a&fid=0&fpath=/&upOrgId=d4643b7b-3293-4c7d-9d38-70b1cebfffe9&uid=d4643b7b-3293-4c7d-9d38-70b1cebfffe9&upUserId=87890288-670b-47f6-a472-01b8bb01c64a&upUserName=%25E8%25B4%25BE%25E8%2589%25B3%25E8%25B6%2585#/index";
+});
 
 //判断是否是企业微信
 function isWeiXin(){
@@ -289,14 +293,14 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         $("#username").val(sysUserInfo.user_Account);
         $("#userpwd").val(sysUserInfo.user_Pwd);
         document.title = sysUserInfo.organization_Name;
-        window.location.href = "/html/home.html#xuexi";
+        window.location.href = "html/home.html#xuexi";
     }
     //登录按钮
     $(document).on('click', '#login_btn', function () {
         var useraccount = $("#username").val();
         var userpwd = $("#userpwd").val();
         //登录
-        login(useraccount,userpwd)
+        login(useraccount,userpwd);
     });
     var isPlayer = false;
      function login(username,pwd){
@@ -307,6 +311,7 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         error_login('登录中','#0894ec');
         getAjax(javaserver + "/ApiUser/login",{ useraccount: username, userpwd: pwd },function (users) {
             isPlayer = false;
+            console.log(useraccount + userpwd);
             users = strToJson(users);
             //用户登录错误次数 >5 <10 显示验证码 ，>10 锁定帐号
             // errorcode  0登录成功 11账号被锁定1小时 12账户或密码有错误 13该用户已经登录 5连接不上数据库 14验证码错误
@@ -345,7 +350,6 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
             } else if (users.errorcode == "0") {
                 error_login('登录完成','#0894ec');
                 SetlocalStorage("userinfo_token", users.token);
-                console.log("asdfasdf123");
                 if (users.data.userstate == "0") {
                     getAjax(javaserver + "/PersonnelManagement/PersonnelGetKey", { user_ID: users.data.userId }, function (retobj) {
                         retobj = strToJson(retobj);
@@ -368,23 +372,13 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                         retobj.data.allrolename = allrolename;
                         //放入缓存
                         SetlocalStorage("userinfo", JSON.stringify(retobj.data));
-
                         document.title = sysUserInfo.organization_Name;
-                        //window.location.href = "html/home.html";
-                        winapi.openWin({
-                            name: 'home',
-                            url: 'html/home.html',
-                            pageParam: {
-                                name: 'home'
-                            }
-                        });
+                        window.location.href = "html/home.html";
                     });
                 } else if (users.data.userstate == "1") {
                      error_login("帐号已冻结");
-                    //console.log("帐号已冻结！");
                 } else if (users.data.userstate == "2") {
                     error_login("账号已锁定");
-                   // console.log("帐号锁定！");
                 }
             }
         });
@@ -473,7 +467,7 @@ $(document).on("pageInit", "#xuexi", function (e, id, $page,window) {
 //登录错误显示
 function error_login(msg,color){
     $("#login_btn").html(msg);
-    $("#login_btn").css("background-color",color?color:"rgb(241, 104, 107)");
+    //$("#login_btn").css("background-color",color?color:"rgb(241, 104, 107)");
 }
 //**********************************************************************
 //打开任务列表是触发
@@ -1769,7 +1763,7 @@ var uploader = WebUploader.create({
     },
     //dnd: '#dndArea',  // 指定接受拖拽上传的容器
     //paste: '#uploader',   //指定复制粘贴的容器
-    swf: '../../res/webuploader/js/Uploader.swf',
+    //swf: '/webuploader/js/Uploader.swf',
     chunked: true, //分片上传
     chunkSize: chunkSize, // 字节 1M分块
     threads: 3, //当前为3个线程同时请求到达
