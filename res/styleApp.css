@@ -25,12 +25,12 @@
     .shuqian-down .end{border-left-color: #3d4145;border-right-color: #3d4145;}
     .shuqian-down .shuqian {width: 0;height: 50px;border-left: 33px solid #3d4145;border-right: 33px solid #3d4145;border-bottom: 10px solid transparent;color: #fff;position:absolute;transition:all 0.3s ease 0s;}
 .shuqian-down .shuqiantext{ position: absolute; display: block; top: 8px; width: 100%; text-align: center;  color: #fff; font-size: 12px; transition:all 0.3s ease 0s; text-align: center;}
-    .xuanzhuan-45{transform:rotate(45deg);-ms-transform:rotate(45deg); 	/* IE 9 */-moz-transform:rotate(45deg); 	/* Firefox */-webkit-                       transform:rotate(45deg); /* Safari ºÍ Chrome */-o-transform:rotate(45deg);/* Opera */}            
-    .file-head li div{height: 30px;word-wrap: break-word; word-break: break-all;overflow: hidden;text-overflow:ellipsis;}        
-    
+    .xuanzhuan-45{transform:rotate(45deg);-ms-transform:rotate(45deg); 	/* IE 9 */-moz-transform:rotate(45deg); 	/* Firefox */-webkit-                       transform:rotate(45deg); /* Safari ï¿½ï¿½ Chrome */-o-transform:rotate(45deg);/* Opera */}
+    .file-head li div{height: 30px;word-wrap: break-word; word-break: break-all;overflow: hidden;text-overflow:ellipsis;}
+
     #htmlUploadListBody li div{height: 30px;word-wrap: break-word; word-break: break-all;overflow: hidden;text-overflow:ellipsis;}
     .progress {background: #f0ad4e;-moz-opacity: 0.5;opacity: 0.5;height: 40px !important;float: left;/* margin: 0px; */margin: 0px -15px;position: absolute;}
-    
+
      .item-media img{ width: 40px;  }
      #filelist .item-title{ height: 2.2rem; line-height: 2.2rem;white-space:pre-wrap; width:100%}
      #filelist  .item-inner{padding-top:0; padding-bottom: 0; }

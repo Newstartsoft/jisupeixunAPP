@@ -68,7 +68,6 @@
                         }
                     },
                     "uploadComplete": function (evt) {
-                        alert(evt);
                         doms.progress.hide();
                         //获得新的图片
                         var newkc = JSON.parse(evt.target.responseText);
