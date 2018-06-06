@@ -43,8 +43,8 @@
               <div class="item-media"><i class="icon iconfont icon-ren3"></i></div>
               <div class="item-inner">
                 <div class="item-input">
-                  <input id="username" type="text" placeholder="用户名/邮箱" />
-									<!-- onfocus ="error_login('登录','#0894ec')"  -->
+                  <input id="username" type="text" placeholder="用户名/邮箱" onfocus ="error_login('登录','#0894ec')"  />
+
                 </div>
               </div>
             </div>
@@ -54,8 +54,8 @@
               <div class="item-media"><i class="icon iconfont icon-denglumima"></i></div>
               <div class="item-inner">
                 <div class="item-input">
-                  <input id="userpwd" type="password" placeholder="密码" />
-									 <!-- onfocus ="error_login('登录','#0894ec')" -->
+                  <input id="userpwd" type="password" placeholder="密码" onfocus ="error_login('登录','#0894ec')" />
+
                 </div>
               </div>
             </div>
@@ -98,6 +98,8 @@
     </style>
   </div>
 </div>
+<script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
+<script type='text/javascript' src="res/socket.js"  async="async"></script>
 <script type='text/javascript' src='res/zepto.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='res/js/light7.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='res/js/i18n/cn.min.js'></script>
@@ -105,9 +107,8 @@
 <link href="res/webuploader/css/webuploader.css" rel="stylesheet" type="text/css" />
 <script src="res/webuploader/js/webuploader.min.js" type="text/javascript"></script>
 <script type="text/javascript" src="ckt/swiper.min.js"></script>
-<script type="text/javascript" src="ckt/weixin.js"></script>
 <script type="text/javascript" src="ckt/upload.js"></script>
+<script type="text/javascript" src="ckt/weixin.js"></script>
 <script type='text/javascript' src="res/jisupeixun.js"  async="async"></script>
-
 </body>
 </html>

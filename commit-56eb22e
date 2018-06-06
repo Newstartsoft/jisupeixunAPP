@@ -1,0 +1,252 @@
+From 56eb22e4d798553499d585108e2809fd9513d97a Mon Sep 17 00:00:00 2001
+From: "903169806@qq.com"
+ <903169806@qq.com@0e1a2743-8d03-4e5a-a60c-7e26af42b145>
+Date: Wed, 23 May 2018 05:21:02 +0000
+Subject: =?UTF-8?q?=E4=B8=AD=E6=96=87=E5=90=8D=E7=A7=B0=E4=BF=AE=E6=94=B9?=
+ =?UTF-8?q?=E6=88=90=E8=8B=B1=E6=96=87?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+git-svn-id: svn://svn4.apicloud.com/A6062586042329/%E6%9E%81%E9%80%9F%E5%9F%B9%E8%AE%AD@40 0e1a2743-8d03-4e5a-a60c-7e26af42b145
+
+diff --git a/login(no have BaiDuPlayer).html b/login(no have BaiDuPlayer).html
+new file mode 100644
+index 0000000..1988ba8
+--- /dev/null
++++ b/login(no have BaiDuPlayer).html	
+@@ -0,0 +1,114 @@
++<!DOCTYPE html>
++<html>
++<head>
++	<meta charset="utf-8">
++    <meta http-equiv="X-UA-Compatible" content="IE=edge">
++    <title>极速培训APP-登录界面</title>
++    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
++    <meta name="apple-mobile-web-app-capable" content="yes">
++    <meta content="yes" name="apple-touch-fullscreen">
++    <meta name="apple-mobile-web-app-status-bar-style" content="black">
++    <link rel="stylesheet" href="res/css/light7.min.css">
++    <link rel="stylesheet" type="text/css" href="res/icon/iconfont.css">
++    <!--环境检查 -->
++    <script src="res/loginCheck.js" type="text/javascript"></script>
++    <script type="text/javascript">
++        //loginCheck();
++        try{
++          api.setStatusBarStyle({
++              style: '#fff'
++          });
++        }catch(e){}
++    </script>
++</head>
++<body>
++<div class="page" id="login">
++ <div style="height: 100%;background-color: #fff;z-index: 20;position: absolute;display:none;width:100%;" class="qidongyediv">
++	 <div class="qydongyeimg" style="height: 80%; background-color:#3399FF; background-image:(); background-size:100%; background-position:center;" ></div>
++		<div style="margin-top:22px;"><center class="qydongyeorg">
++				<img src="http://console.jisupeixun.com/app/framework/img/logo.png" height="60" /></br>
++			北京新启科技</center></div>
++	</div>
++  <header class="bar bar-nav">
++    <h1 id="title" class="title">极速培训APP</h1>
++  </header>
++  <div class="content">
++    <div class="page-login">
++      <div class="list-block inset text-center">
++        <h3><img src="res/img/logo.png"></h3>
++        <ul>
++          <!-- Text inputs -->
++          <li>
++            <div class="item-content">
++              <div class="item-media"><i class="icon iconfont icon-ren3"></i></div>
++              <div class="item-inner">
++                <div class="item-input">
++                  <input id="username" type="text" placeholder="用户名/邮箱" onfocus ="error_login('登录','#0894ec')"  />
++
++                </div>
++              </div>
++            </div>
++          </li>
++          <li>
++            <div class="item-content">
++              <div class="item-media"><i class="icon iconfont icon-denglumima"></i></div>
++              <div class="item-inner">
++                <div class="item-input">
++                  <input id="userpwd" type="password" placeholder="密码" onfocus ="error_login('登录','#0894ec')" />
++
++                </div>
++              </div>
++            </div>
++          </li>
++
++        </ul>
++      </div>
++      <!--<div id="login_error" style=" text-align:center; color:Red;">请求失败</div>-->
++      <div class="content-block">
++        <p><a class="button button-big button-fill external" id="login_btn" data-transition='fade'>登 录</a></p>
++        <p class='text-center signup'>
++        	<a href="http://console.jisupeixun.com/user/forget_pwd.html" class='pull-right' external>忘记密码？</a>
++            <a href="#" class='pull-left' external style="display: none;">注册</a>
++        </p>
++       <!-- <div class="leader">其它登录方式</div>
++        <div class="row others">
++          <a class="col-33"> <img src="http://gtms04.alicdn.com/tps/i4/TB1n75bIFXXXXaMXXXXgYS7HVXX-96-144.png" alt="" width='60'></a>
++          <a class="col-33"> <img src="http://gtms03.alicdn.com/tps/i3/TB1fN1XIFXXXXbEXXXX8oekJXXX-98-149.png" alt="" width='61'></a>
++          <a class="col-33"> <img src="http://gtms02.alicdn.com/tps/i2/TB16fh8IFXXXXXdXpXXEs40ZFXX-105-147.png" alt="" width='64'></a>
++        </div>
++      </div>-->
++    </div>
++    <style>
++      .content {
++        color: #999;
++      }
++      .button.button-fill.button-big {
++        line-height: 2.0rem;
++        height: 2.0rem;
++      }
++      .list-block {
++        margin: .75rem;
++      }
++      .content-block {
++        margin: .75rem 0;
++      }
++      .signup a {
++        color: #999;
++      }
++    </style>
++  </div>
++</div>
++<script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
++<script type='text/javascript' src="res/socket.js"  async="async"></script>
++<script type='text/javascript' src='res/zepto.min.js' charset='utf-8'></script>
++<script type='text/javascript' src='res/js/light7.min.js' charset='utf-8'></script>
++<script type='text/javascript' src='res/js/i18n/cn.min.js'></script>
++<script src="res/js/jquery-1.10.2.min.js" type="text/javascript"></script>
++<link href="res/webuploader/css/webuploader.css" rel="stylesheet" type="text/css" />
++<script src="res/webuploader/js/webuploader.min.js" type="text/javascript"></script>
++<script type="text/javascript" src="ckt/swiper.min.js"></script>
++<script type="text/javascript" src="ckt/upload.js"></script>
++<script type="text/javascript" src="ckt/weixin.js"></script>
++<script type='text/javascript' src="res/jisupeixun.js"  async="async"></script>
++</body>
++</html>
+diff --git "a/login\344\270\215\345\220\253\347\233\264\346\222\255\346\222\255\346\224\276\345\231\250.html" "b/login\344\270\215\345\220\253\347\233\264\346\222\255\346\222\255\346\224\276\345\231\250.html"
+deleted file mode 100644
+index 1988ba8..0000000
+--- "a/login\344\270\215\345\220\253\347\233\264\346\222\255\346\222\255\346\224\276\345\231\250.html"
++++ /dev/null
+@@ -1,114 +0,0 @@
+-<!DOCTYPE html>
+-<html>
+-<head>
+-	<meta charset="utf-8">
+-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+-    <title>极速培训APP-登录界面</title>
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+-    <meta name="apple-mobile-web-app-capable" content="yes">
+-    <meta content="yes" name="apple-touch-fullscreen">
+-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+-    <link rel="stylesheet" href="res/css/light7.min.css">
+-    <link rel="stylesheet" type="text/css" href="res/icon/iconfont.css">
+-    <!--环境检查 -->
+-    <script src="res/loginCheck.js" type="text/javascript"></script>
+-    <script type="text/javascript">
+-        //loginCheck();
+-        try{
+-          api.setStatusBarStyle({
+-              style: '#fff'
+-          });
+-        }catch(e){}
+-    </script>
+-</head>
+-<body>
+-<div class="page" id="login">
+- <div style="height: 100%;background-color: #fff;z-index: 20;position: absolute;display:none;width:100%;" class="qidongyediv">
+-	 <div class="qydongyeimg" style="height: 80%; background-color:#3399FF; background-image:(); background-size:100%; background-position:center;" ></div>
+-		<div style="margin-top:22px;"><center class="qydongyeorg">
+-				<img src="http://console.jisupeixun.com/app/framework/img/logo.png" height="60" /></br>
+-			北京新启科技</center></div>
+-	</div>
+-  <header class="bar bar-nav">
+-    <h1 id="title" class="title">极速培训APP</h1>
+-  </header>
+-  <div class="content">
+-    <div class="page-login">
+-      <div class="list-block inset text-center">
+-        <h3><img src="res/img/logo.png"></h3>
+-        <ul>
+-          <!-- Text inputs -->
+-          <li>
+-            <div class="item-content">
+-              <div class="item-media"><i class="icon iconfont icon-ren3"></i></div>
+-              <div class="item-inner">
+-                <div class="item-input">
+-                  <input id="username" type="text" placeholder="用户名/邮箱" onfocus ="error_login('登录','#0894ec')"  />
+-
+-                </div>
+-              </div>
+-            </div>
+-          </li>
+-          <li>
+-            <div class="item-content">
+-              <div class="item-media"><i class="icon iconfont icon-denglumima"></i></div>
+-              <div class="item-inner">
+-                <div class="item-input">
+-                  <input id="userpwd" type="password" placeholder="密码" onfocus ="error_login('登录','#0894ec')" />
+-
+-                </div>
+-              </div>
+-            </div>
+-          </li>
+-
+-        </ul>
+-      </div>
+-      <!--<div id="login_error" style=" text-align:center; color:Red;">请求失败</div>-->
+-      <div class="content-block">
+-        <p><a class="button button-big button-fill external" id="login_btn" data-transition='fade'>登 录</a></p>
+-        <p class='text-center signup'>
+-        	<a href="http://console.jisupeixun.com/user/forget_pwd.html" class='pull-right' external>忘记密码？</a>
+-            <a href="#" class='pull-left' external style="display: none;">注册</a>
+-        </p>
+-       <!-- <div class="leader">其它登录方式</div>
+-        <div class="row others">
+-          <a class="col-33"> <img src="http://gtms04.alicdn.com/tps/i4/TB1n75bIFXXXXaMXXXXgYS7HVXX-96-144.png" alt="" width='60'></a>
+-          <a class="col-33"> <img src="http://gtms03.alicdn.com/tps/i3/TB1fN1XIFXXXXbEXXXX8oekJXXX-98-149.png" alt="" width='61'></a>
+-          <a class="col-33"> <img src="http://gtms02.alicdn.com/tps/i2/TB16fh8IFXXXXXdXpXXEs40ZFXX-105-147.png" alt="" width='64'></a>
+-        </div>
+-      </div>-->
+-    </div>
+-    <style>
+-      .content {
+-        color: #999;
+-      }
+-      .button.button-fill.button-big {
+-        line-height: 2.0rem;
+-        height: 2.0rem;
+-      }
+-      .list-block {
+-        margin: .75rem;
+-      }
+-      .content-block {
+-        margin: .75rem 0;
+-      }
+-      .signup a {
+-        color: #999;
+-      }
+-    </style>
+-  </div>
+-</div>
+-<script src="http://123.57.255.51:3000/socket.io/socket.io.js" type="text/javascript"></script>
+-<script type='text/javascript' src="res/socket.js"  async="async"></script>
+-<script type='text/javascript' src='res/zepto.min.js' charset='utf-8'></script>
+-<script type='text/javascript' src='res/js/light7.min.js' charset='utf-8'></script>
+-<script type='text/javascript' src='res/js/i18n/cn.min.js'></script>
+-<script src="res/js/jquery-1.10.2.min.js" type="text/javascript"></script>
+-<link href="res/webuploader/css/webuploader.css" rel="stylesheet" type="text/css" />
+-<script src="res/webuploader/js/webuploader.min.js" type="text/javascript"></script>
+-<script type="text/javascript" src="ckt/swiper.min.js"></script>
+-<script type="text/javascript" src="ckt/upload.js"></script>
+-<script type="text/javascript" src="ckt/weixin.js"></script>
+-<script type='text/javascript' src="res/jisupeixun.js"  async="async"></script>
+-</body>
+-</html>
