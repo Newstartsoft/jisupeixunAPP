@@ -13,39 +13,39 @@ function openSj(data,arrangeId) {
     if(arrangeId==99||arrangeId=="99"){
         //随机卷
         if(data.exampaper.paper_Random == "0"){
-            //window.location.href =javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?f=app&userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
-            gotoUrl = javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?f=app&userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            window.location.href =javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?f=app&userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            //gotoUrl = javafile+"/resources/exam/"+data.paperId+","+data.randomCount+"/"+((data.randomNum==undefined)?1:data.randomNum)+".html"+"?f=app&userid="+sysUserInfo.user_ID+"&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
        //固定卷
         }else{
-            //window.location.href =javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&f=app&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
-            gotoUrl = javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&f=app&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            window.location.href =javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&f=app&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            //gotoUrl = javafile+data.exampaper.url+"?userid="+sysUserInfo.user_ID+"&f=app&id=99&scoreId="+data.scoreId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
         }
     //打开试卷
     }else{
         //随机卷
         if(data.paper_Random == "0"){
              data.url =  getPaperUrl(data.url,data.paperCount)
-             //window.location.href =javafile+data.url+"&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
-             gotoUrl = javafile+data.url+"&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+             window.location.href =javafile+data.url+"&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+             //gotoUrl = javafile+data.url+"&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
          }else{
-            //location.href =javafile+data.url+"?random=0&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
-            gotoUrl = javafile+data.url+"?random=0&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            window.location.href =javafile+data.url+"?random=0&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
+            //gotoUrl = javafile+data.url+"?random=0&f=app&userid="+sysUserInfo.user_ID+"&arrangeId="+arrangeId+"&token="+strToJson(GetlocalStorage("userinfo_token"));
         }
     }
-    if(gotoUrl != ""){
-      api.openWin({
-          name: 'kaoshi',
-          animation:{
-              type:"flip",                //动画类型（详见动画类型常量）
-              subType:"from_right",       //动画子类型（详见动画子类型常量）
-              duration:300                //动画过渡时间，默认300毫秒
-          },
-          url: gotoUrl,
-          pageParam: {
-              name: '考试'
-          }
-      });
-    }
+    // if(gotoUrl != ""){
+    //   api.openWin({
+    //       name: 'kaoshi',
+    //       animation:{
+    //           type:"flip",                //动画类型（详见动画类型常量）
+    //           subType:"from_right",       //动画子类型（详见动画子类型常量）
+    //           duration:300                //动画过渡时间，默认300毫秒
+    //       },
+    //       url: gotoUrl,
+    //       pageParam: {
+    //           name: '考试'
+    //       }
+    //   });
+    // }
 }
 //打开题库
 function openTi(obj){
@@ -91,8 +91,14 @@ var csm = {};//播放记忆存储容器
 csm.list=[];
 var Tstate = 1; // 计时器，0暂停，1正常
 var pedding=false;
+var goTime=10;//进度提交间隔（分钟）
+var timer1=null;//计时器
 var newStudyDetailsJson={timeStart:"",timeEnd:"",cousreid:"",csid:"",sectionName:"",courseType:"",dateLearn:""};
 $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
+    //单独的计时器，每隔10分钟，提交一次进度
+    timer1=window.setInterval(function automatic(){
+        tongbu("aaa");
+    },1000*60*goTime);
     newStudyDetailsJson={timeStart:"",timeEnd:"",cousreid:"",csid:"",sectionName:"",courseType:"",dateLearn:""};
     newStudyDetailsJson.timeStart=new Date().format("yyyy-MM-dd hh:mm:ss");
     newStudyDetailsJson.dateLearn=newStudyDetailsJson.timeStart;
@@ -100,12 +106,10 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
     //浏览器刷新
     window.onbeforeunload =function(){
         tongbu("aaa",true);
-        console.log("刷新了");
         setTimeout(function() {
             return true;
         }, 2000);
     }
-
     //判断是否收藏  修改样式
     function collectionStatusJudge(id){
         if(id!=null&&id!=undefined&&id!=""){
@@ -206,9 +210,16 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                var xiazaihtml = "";
                if(csobj.stypename == "视频"){
                   var chapterobj = eval(csobj.chapterJson);
-                  if(chapterobj[0].fileType != "m3u8"){
-                    xiazaihtml = "<div class='button ' style=\"margin-left: -0.5rem;\"><i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj[0].filepreview+"',savePath: 'fs://极速培训/"+csobj.CSFILEID + "/" + chapterobj[0].fileName +"',iconPath:'"+chapterobj[0].filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i></div>";
+                  try {
+                    if(chapterobj[0].fileType != "m3u8"){
+                      xiazaihtml = "<div class='button ' style=\"margin-left: -0.5rem;\"><i class=\"iconfont icon-xiazai\" style=\"font-size:18px;\" onclick=\"downfile({url: '"+chapterobj[0].filepreview+"',savePath: 'fs://极速培训/"+csobj.CSFILEID + "/" + chapterobj[0].fileName +"',iconPath:'"+chapterobj[0].filecover+"',cache: true,allowResume: true,title: '"+csobj.CSNAME+"',networkTypes: 'all'})\"> </i></div>";
+                    }
+                  } catch (e) {
+
+                  } finally {
+
                   }
+
                }
                zjhtml+= "<li class=\"item-content\" id='kecheng_"+csobj.CSID+"'><div class=\"item-inner\" onClick='bofang("+JSON.stringify(csobj)+")'><div class=\"item-title\" style=\"min-width:75%;\">"+csobj.CSNAME.replace(/<\/?[^>]*>/g,'')+"</div>";
                if(csobj.CSTYPE == "1" ||csobj.CSTYPE == 1 || csobj.CSTYPE == "2" || csobj.CSTYPE == 2)
@@ -261,20 +272,7 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                 else{
                     jiluid = (((1+Math.random())*0x10000)|0).toString(16) + (((1+Math.random())*0x10000)|0).toString(16);//随机产生个10位字符串
                 }
-
-
                 var studyJsonDetailsJson = eval( '(' + studyDetailsJson.json_details + ')' );//解析记忆内容
-
-               // 读取本地缓存，替换原来的
-               // var localmemary=GetlocalStorage("C_"+PlayCourse.courseId);
-                //判断日期
-
-               // if(localmemary!=null&&localmemary!=""&&localmemary!=undefined){
-                     // if(new Date(studyDetailsJson.date_time)<new Date(localmemary.datetime)||studyJsonDetailsJson==null||studyJsonDetailsJson==undefined||studyJsonDetailsJson==""){
-                        // studyJsonDetailsJson=localmemary;
-                        // studyDetailsJson.json_details=localmemary;
-                    // }
-                // }
                 //console.log(studyJsonDetailsJson);//这里才是真正有用的东西
                 if (studyJsonDetailsJson != null) {
                     // 异步读取书签正常
@@ -343,31 +341,68 @@ $(document).on("pageInit", "#renwu_detail", function(e, id, $page) {
                 }
         });
         }else{
-                     // 没有记忆，默认播放第一个
-                    if ($("#kechengmingxi .item-content").length > 0) {
-                        $("#kechengmingxi .item-content").eq(0).click();
-                        $("#kechengmingxi .item-content").eq(0).click();
+             // 没有记忆，默认播放第一个
+            if ($("#kechengmingxi .item-content").length > 0) {
+                $("#kechengmingxi .item-content").eq(0).click();
+                $("#kechengmingxi .item-content").eq(0).click();
 
-                    } else {
-                        $.toast('课程还未增加内容哦！');
-                    }
+            } else {
+                $.toast('课程还未增加内容哦！');
+            }
         }
+    //底部弹出清晰度列表
+    $(".qingxidu").on("click", function () {
+      var btnArr = [];
+      var btnUrlArr = [];
+      $(".videotypelist li").each(function () {
+        var classN = $(this).attr("class");
+        //var qxdStr = "BQGQCQLG";
+        if(classN == "BQ"){
+          btnArr.push("标清");
+          btnUrlArr.push($(this).attr("data"));
+        }else if(classN == "GQ"){
+          btnArr.push("高清");
+          btnUrlArr.push($(this).attr("data"));
+        }else if(classN == "CQ"){
+          btnArr.push("超高清");
+          btnUrlArr.push($(this).attr("data"));
+        }else if(classN == "LG"){
+          btnArr.push("蓝光");
+          btnUrlArr.push($(this).attr("data"));
+        }
+      });
+      if(btnArr.length > 0){
+        api.actionSheet({
+            title: '选择清晰度',
+            cancelTitle: '取消',
+            buttons: btnArr
+          }, function(ret, err) {
+            var index = ret.buttonIndex - 1;
+            switchVideo(btnUrlArr[index], btnArr[index]);
+          });
+      }else {
+        api.actionSheet({
+            title: '选择清晰度',
+            destructiveTitle:'无清晰度',
+            cancelTitle: '取消'
+          }, function(ret, err) {
+            var index = ret.buttonIndex;
+          });
+      }
 
+    });
 });
 //播放不同清晰度的视频
 function switchVideo(okayUrl,title){
-
     //关闭层
     $.closeModal('.popover-qingxidu');
    //判断清晰度
    $(".qingxidu").text(title);//清晰度
-
    //视频播放
    $("#kecheng_play_mian_top_play").show();
    $("#playText").hide();
    $("#kechengContent").css("top","12rem");
    mainplayer("kecheng_play_mian_top_play", 634, okayUrl);
-
 }
 //开始播放记忆课程
 function bofang(xiaojie) {
@@ -393,7 +428,6 @@ function bofang(xiaojie) {
           $(".qingxidu").show();
             var jsonlist = JSON.parse(data);
             if(jsonlist.errorcode == "0"){
-
                     //console.log(jsonlist.datas);
                     var BDvideoList = new Array();
                     var QNvideoList = new Array();
@@ -545,9 +579,10 @@ function bofang(xiaojie) {
                         }
                         switchVideo(okayUrl,qxd);
                     }else{
-
-                         $.toast('无法解析到课程播放视频！');
-                        $(".qingxidu").removeClass("qingxidu");
+                        qxd ="临时";
+                        okayUrl = jsonlist.datas[0].URL;
+                        //$.toast('无法解析到课程播放视频！');
+                        //$(".qingxidu").removeClass("qingxidu");
                     }
                 }else{
                      $.toast('课程视频解析错误！');
@@ -590,8 +625,8 @@ function bofang(xiaojie) {
         $("#kecheng_play_mian_top_play").hide();
         $("#playText").show();
         if(CKobject&&CKobject.getObjectById('ckplayer_a1')){
-			CKobject.getObjectById('ckplayer_a1').videoPause();
-		}
+    			CKobject.getObjectById('ckplayer_a1').videoPause();
+    		}
         mainplayer("playText", 634, sectionUrl);
         break;
     case '3':
@@ -602,7 +637,6 @@ function bofang(xiaojie) {
         $("#kechengContent").css("top","12rem");
         $("#kecheng_play_mian_top_play").html("<div class='shanguang'><img src='../../res/img/logo_fff.png' alt='加载中...'><div class='baiguang'></div></div>");
         playSectionalExamination(xiaojie);
-
         break;
     case '4':
     case 4:
@@ -1008,7 +1042,8 @@ function jishiqi(jilu){
                 csm.list.splice(i,1);//清除原有记录
 
                 csm.list.push(jilu);//更新新数据
-
+                //找到记录更新本地缓存
+                SetlocalStorage("C_"+ csm.key,JSON.stringify(csm));
                 break;//找到合适的了，就要跳出循环，性能！
             }
     }
@@ -1044,7 +1079,6 @@ function tongbu(msg,istongbu){
             newStudyDetailsJson.cousreid=csm.key;//课程id
             newStudyDetailsJson.csid=csm.playpid;//播放的小节id
             newStudyDetailsJson.sectionName=$("#kecheng_"+csm.playpid+" .item-title").html();//播放小节的名称
-
             for(var i=0;i<csm.list.length;i++){
                 if(csm.list[i].pid==csm.playpid){
                     newStudyDetailsJson.courseType=csm.list[i].ptype;//播放小节的类型
@@ -1054,11 +1088,10 @@ function tongbu(msg,istongbu){
                     break;
                 }
             }
-
             if(newStudyDetailsJson!=null&&(newStudyDetailsJson.courseType==1||newStudyDetailsJson.courseType=="1"||newStudyDetailsJson.courseType==2||newStudyDetailsJson.courseType=="2")){
                 newjson="["+JSON.stringify(newStudyDetailsJson)+"]"
             }
-        }
+       }
        var canshu ={
             jsonDetails : JSON.stringify(csm),//课程学习记录
             studyDetailsId : jiluid,//存档ID
@@ -1166,7 +1199,7 @@ var mainplayer = function(Cantent, Height, mima) {
       // / <summary>
       // / 增加文档播放组件
       // / </summary>
-       $("#" + Cantent).html("<iframe class=\"embed-responsive-item\" src='" +  "../../res/pdf2/officeshow/web/viewer.html?file=" +
+       $("#" + Cantent).html("<iframe class=\"embed-responsive-item\" src='" +  "http://file.jisupeixun.com/resources/pdf2/officeshow/web/viewer.html?file=" +
         base64encode(encodeURI(mima)) + "'></iframe>");
         try{
           bPlayer.close();
@@ -1213,10 +1246,14 @@ var mainplayer = function(Cantent, Height, mima) {
 
 
 //封装百度播放器
+var bPlayer = {};
 var BaiDuPlayer = new function(){
 try{
   //播放
   this.play = function (Cantent, Height, mima){
+    try{
+      bPlayer.close();
+    }catch(e){}
     bPlayer = api.require('bPlayer');  //实例化百度播放器
     var systemType = api.systemType;
     if(systemType == 'ios'){

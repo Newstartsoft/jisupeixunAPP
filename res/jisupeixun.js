@@ -4,6 +4,7 @@
 //*************************************************
 
 var javaserver = "http://api.jisupeixun.com";//"http://180.76.156.234:9187";
+//var javaserver = "http://192.168.1.148:8080";
 var javafile = "http://file.jisupeixun.com";//文件上传接口
 var systemTitle="极速培训";
 var domain="http://console.jisupeixun.com"; // 题目练习地址
@@ -161,7 +162,7 @@ $("#course_make").click(function(){
             subType:"from_right",       //动画子类型（详见动画子类型常量）
             duration:300                //动画过渡时间，默认300毫秒
         },
-        url: "../ckt/ckt.html?callback=http://api.jisupeixun.com/Kapi/AddEditURLCollection&type=0&key="+guid()+"&fid=0&fpath=/&upOrgId="+getUserInfo().organization_ID+"&upUserId="+getUserInfo().user_ID+"&upUserName="+getUserInfo().user_Name+"#/index",
+        url: "../ckt/ckt.html?callback=http://api.jisupeixun.com/Kapi/AddEditURLCollection&type=0&key="+guid()+"&fid=0&fpath=/&upOrgId="+getUserInfo().organization_ID+"&uid="+getUserInfo().user_ID+"&upUserName="+getUserInfo().user_Name+"#/index",
         pageParam: {
             name: '课程录制'
         }
@@ -274,7 +275,7 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         $("#userpwd").val(sysUserInfo.user_Pwd);
         document.title = sysUserInfo.organization_Name;
         if(sysUserInfo.powerLV == "99"){  //学员身份隐藏管理功能
-            $("#manage_m").heide();
+            $("#manage_m").hide();
         }
         //window.location.href = "html/home.html#xuexi";
         GetADBanerAndStartImg();
@@ -357,11 +358,7 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
                         SetlocalStorage("userinfo", JSON.stringify(retobj.data));
                         SetlocalStorage("UserEnterpriseOrgID", sysUserInfo.organization_ID);  //主要用户读取广告的时候用到企业id
                         document.title = sysUserInfo.organization_Name;
-                        if(sysUserInfo.powerLV == "99"){  //学员身份隐藏管理功能
-                            $("#manage_m").heide();
-                        }
-                        GetADBanerAndStartImg();
-                        //window.location.href = "html/home.html";
+                        window.location.href = "html/home.html";
                     });
                 } else if (users.data.userstate == "1") {
                      error_login("帐号已冻结");
@@ -373,6 +370,51 @@ $(document).on("pageInit", "#login", function (e, id, $page) {
         }
 });
 
+//系统扫一扫功能，扫码
+function saoyisao(){
+  var FNScanner = api.require('FNScanner');
+   FNScanner.openScanner({
+       autorotation: true
+   }, function(ret, err) {
+       if (ret) {
+          var FNobj = strToJson(ret);
+          if(FNobj.eventType == "cameraError"){
+            $.toast("访问摄像头失败");
+            FNScanner.closeView();
+          }else if(FNobj.eventType == "albumError"){
+            $.toast("访问相册失败");
+            FNScanner.closeView();
+          }else if(FNobj.eventType == "fail"){
+            $.toast("扫码失败,请重试！");
+            FNScanner.closeView();
+          }else if(FNobj.eventType == "success"){
+            var hrefUrl = FNobj.content;
+            api.openFrame({
+                name: 'ComonFrame',
+                slidBackEnabled:true,
+                vScrollBarEnabled:true,
+                animation:{
+                    type:"push",                //动画类型（详见动画类型常量）
+                    subType:"from_right",       //动画子类型（详见动画子类型常量）
+                    duration:300                //动画过渡时间，默认300毫秒
+                },
+                progress:{
+                  type:"page",                //加载进度效果类型，默认值为 default，取值范围为 default|page，default 等同于 showProgress 参数效果；为 page 时，进度效果为仿浏览器类型，固定在页面的顶部
+                  title:"",               //type 为 default 时显示的加载框标题
+                  text:"正在加载",
+                  color:"#39f"                //type 为 page 时进度条的颜色，默认值为 #45C01A，支持#FFF，#FFFFFF，rgb(255,255,255)，rgba(255,255,255,1.0)等格式
+                },
+                url: '../html/manager/CommonHtml.html',
+                pageParam: {
+                    name: '扫码结果',
+                    resultUrl:hrefUrl
+                }
+            });
+          }
+       } else {
+       }
+   });
+}
 function nofunction(){
     $.toast('暂未开放！');
 }
@@ -385,6 +427,7 @@ $(document).on("pageInit", "#xuexi", function (e, id, $page,window) {
     bPlayer.close();
   }catch(e){}
   $("#homeAdArr").html(GetlocalStorage("HomeAddStr"));
+  try{
   var swiper = new Swiper('.swiper-container', {
       pagination: {
         el: '.swiper-pagination',
@@ -395,8 +438,11 @@ $(document).on("pageInit", "#xuexi", function (e, id, $page,window) {
       observeParents:true,
       autoplayDisableOnInteraction : false,
       autoplay:true
-  });
+  });}catch(e){}
     sysUserInfo=getUserInfo();
+    if(sysUserInfo.powerLV == "99"){  //学员身份隐藏管理功能
+        $("#manage_m").hide();
+    }
     //请求过期任务提醒
     getAjax(javaserver + "/exampaper/getSevenArrange",
                    { orgid: sysUserInfo.organization_ID,
@@ -1444,574 +1490,579 @@ function openTag() {
       });
 };
 
-//***********************************************************************************
-//                               文件上传开始
+//***********************************************************************************//
+                              //文件上传开始
 //***********************************************************************************
 //fileOnload("资料");
-//
-// function fileOnload(title, fid, fpath) {
-//     $('#popup-file-close').attr('onClick', 'closeFilePanel("' + title + '")');
-//     $('.title').html("上传文件列表");
-//     $.popup('.popup-file');
-//     if(fid == undefined || fid == null || fid == "")
-//     fid =0;
-//     if(fpath == undefined || fpath == null || fpath == "")
-//     fpath = "/";
-//     fileInit(fid,fpath); // 文件上传初始化
-//     console.log("hello file");
-//
-// }
-// /*******************************文件搜索*********************************************/
-// function showSoInupt(index){
-//     //显示搜索框
-//     if(index==1){
-//          $("#SosoShow").show();
-//          $("#searchFileName").focus();
-//     }else{
-//          $("#SosoShow").hide();
-//          getfilelist(0, "", "", "", 2, 20,1, true);
-//     }
-// }
-//
-// var chunkSize = 1024 * 1024*10;    //以后端的约定  分片的大小
-// // 获取用户信息
-// var sysUserInfo = strToJson(GetlocalStorage("userinfo"));
-// var uploadParams = {}; //上传参数
-// var $htmlUploadListBody = $('#htmlUploadListBody'); // 上传列表
-// //var $countUpFileNum = $("#countUpFileNum"); //上传的总文件数
-// var countUpFile = []; // 一共上传中的文件 id 文件id name 文件名 size 文件大小 fpath 父级目录 state 文件状态 type 文件类型
-// //var $successUpFileNum = $("#successUpFileNum"); // 上传完成了文件数
-// // 初始化参数
-// function fileInit(fid,fpath) {
-//     sysUserInfo = strToJson(GetlocalStorage("userinfo"));
-//     $htmlUploadListBody = $('#htmlUploadListBody'); // 上传列表
-//     uploadParams = {     //请求参数
-//         upid: "",       // 文件id 可空
-//         status: 4,     // 文件状态 0成功 1转码失败 2上传中 3上传失败
-//         fid: fid == 0 ? 0 : fid,        // 文件父级id
-//         fpath: fpath == null?"/":fpath,      // 文件父级地址
-//         filename: "",       // 文件名称
-//         filetype: "",       //文件类型
-//         size: "",           // 文件大小
-//         optype: 1,   // 文件上传
-//         orgid: sysUserInfo.organization_ID,            // 企业id
-//         orgname: sysUserInfo.organization_Name,        // 企业名称
-//         userid: sysUserInfo.user_ID,                    // 用户id
-//         username: sysUserInfo.user_Name               //  用户名称
-//     }
-//     fileTosast("");
-//     $.showIndicator();
-//     // 获取这个人之前上传的数据
-//     getAjax(javafile + "/Md5File/findRedissFile", { userid: sysUserInfo.user_ID }, function (response) {
-//         $.hideIndicator();
-//         $htmlUploadListBody.html("");
-//         if (response.errorcode == 0) {
-//             response.datas.forEach(function (item, ind) { // 路径需要处理
-//                 //处理参数
-//                 item.id = null; //队列id
-//                 item.upId = item.upid;  //文件id
-//                 item.fileType = item.filetype;  //文件类型
-//                 item.fileName = item.filename;  // 文件名称
-//                 item.fileSize = item.size; // 文件大小
-//                 item.filepath = item.fpath; //文件地址
-//                 addFileHtml(item); //生成html
-//             });
-//             countUpFile = response.datas;
-//         }
-//     },"","json");
-// }
-// // 打开选择文件初始化请求参数
-// function openUploadFile() {
-//     //fileTosast("打开");
-//     // 调用单击事件
-//     document.getElementById("uploadInfoBtn").childNodes[1].childNodes[1].click();
-// }
-//
-// // HOOK 这个必须要再uploader实例化前面
-// WebUploader.Uploader.register({
-//     'before-send-file': 'beforeSendFile',
-//     'before-send': 'beforeSend'
-// }, {
-//     //add-file(files): File对象或者File数组	用来向队列中添加文件。
-//     //before-send-file	(file) file : 对象    在文件发送之前request，此时还没有分片（如果配置了分片的话），可以用来做文件整体md5验证。
-//     //before-send(block)	block: 分片对象	   在分片发送之前request，可以用来做分片验证，如果此分片已经上传成功了，可返回一个rejected promise来跳过此分片上传
-//     //after-send-file(file): File对象	在所有分片都上传完毕后，且没有错误后request，用来做分片验证，此时如果promise被reject，当前文件上传会触发错误。
-//     beforeSendFile: function (file) {
-//         console.log("beforeSendFile");
-//         // Deferred对象在钩子回掉函数中经常要用到，用来处理需要等待的异步操作。
-//         var task = new jQuery.Deferred();
-//         // 根据文件内容来查询MD5
-//         uploader.md5File(file).progress(function (percentage) {   // 及时显示进度
-//             fileTosast("正在加入队列" + file.name + "..." + parseInt(percentage * 100));
-//             console.log('计算md5进度:', percentage);
-//             getProgressBar(file, percentage, "MD5");
-//         }).then(function (val) { // 完成
-//             console.log('md5 result:', val);
-//             fileTosast("");
-//             file.md5 = val;
-//             // 模拟用户id
-//             // file.uid = new Date().getTime() + "_" + Math.random() * 100;
-//             file.uid = WebUploader.Base.guid();
-//             // 创建文件对象
-//             // 第一次发出请求要数据库 文件对象 如果是实时的需要添加钩子（*）
-//             uploadParams.filename = file.name;  //文件名称
-//             uploadParams.size = (file.size / 1024); // 文件大小
-//             uploadParams.filetype = file.ext;   //文件类型
-//             uploadParams.md5 = val;
-//             getAjax(javaserver + "/Kapi/upfiles", uploadParams, function (response) {
-//                 countUpFile.forEach(function (item, index) {
-//                     if (item.upId == file.id) {
-//                         countUpFile.splice(index, 1);
-//                     }
-//                 });
-//                 $("#"+file.id).remove();
-//                 //计算进度
-//                 console.log("文件对象获取：" + response);         // 30 更新子版本
-//                 // 不存在
-//                 var responseIsExist = true;
-//                 if (response.errorcode == "0") {
-//                     //文件唯一id赋值
-//                     file.upId = response.data.upId;
-//                 } else if (response.errorcode == "30") {
-//                     //更新文件
-//                     file.upId = response.data.id;
-//                 }
-//                 // 判断文件是否存在
-//                 countUpFile.forEach(function (item, index) {
-//                     if (item.upId == response.data.upId) {
-//                         responseIsExist = false;
-//                     }
-//                 });
-//                 if (responseIsExist) {
-//                     var obj = response.data;
-//                     obj.md5 = val;
-//                     if (response.errorcode == "0") { // 获取对象成功
-//
-//                         //处理参数
-//                         obj.id = file.id; //文件队列中id
-//                         obj.status = 4; //文件上传状态
-//                         obj.optype = 1; //文件上传
-//                         addFileHtml(obj); //生成html
-//                         // 添加文件
-//                         addFile(obj, true);
-//                     } else if (response.errorcode == "30") { // 暂时复杂  更新子版本
-//                         //处理参数
-//                         obj.upId = obj.id;  //文件id
-//                         obj.id = file.id // 文件队列中id
-//                         obj.fileType = obj.Extended;  //文件类型
-//                         obj.fileName = obj.Name;  // 文件名称
-//                         obj.fileSize = obj.Size; // 文件大小
-//                         obj.filepath = ""; //文件地址
-//                         obj.status = 4; // 文件上传状态
-//                         obj.optype = 2; //更新文件
-//                         addFileHtml(obj); //生成html
-//                         // 添加文件
-//                         addFile(obj, true);
-//
-//                     }else if (response.errorcode == "39") {    // 文件空间超出最大限制
-//                        $.prompt('存储空间超过最大限制','', function (value) {
-//                         },null,'警告');
-//                         task.reject();
-//                     }
-//                 }
-//                 // 进行md5判断
-//                 getAjax(javafile + "/Md5File/checkFileMd5", { userid: sysUserInfo.user_ID, md5: file.md5 }, function (data) {
-//                     // 返回的状态码
-//                     status = data.errorcode;
-//                     console.log(data.errormsg);
-//                     task.resolve();
-//                     if (status == 101) {
-//                         // 文件不存在，那就正常流程
-//                     } else if (status == 100) {
-//                         // 忽略上传过程，直接标识上传成功；文件已经上传
-//                         uploader.skipFile(file);
-//                         file.pass = true;
-//                     } else if (status == 102) {
-//                         // 部分已经上传到服务器了，但是差几个模块。
-//                         console.log(data.datas);
-//                         file.missChunks = data.datas;
-//                     }
-//                 }, function () {  //上传失败
-//                     task.reject();
-//                     // 参数二不传则为暂停上传
-//                     //uploader.removeFile(file, true);
-//                     $('#' + file.upId + ' .jindu').html('<div onclick="fileRetry()"><i class="iconfont" style="color: red" >&#xe6b9;</i> 上传中断</div> ');
-//                 }, "json", "post");
-//
-//             }, function () {
-//                 task.reject();
-//                 console.log("文件异常");
-//                 fileTosast("文件异常");
-//                 // 参数二不传则为暂停上传
-//                 uploader.removeFile(file, true);
-//
-//             },"json");
-//             // 日志
-//             console.log("beforeSendFile", file, uploader);
-//         });
-//         return jQuery.when(task);
-//     },
-//     beforeSend: function (block) {
-//         console.log("block")
-//         var task = new jQuery.Deferred();
-//         var file = block.file;
-//         var missChunks = file.missChunks;
-//         var blockChunk = block.chunk;
-//         console.log("当前分块：" + blockChunk);
-//         console.log("missChunks:" + missChunks);
-//         if (missChunks !== null && missChunks !== undefined && missChunks !== '') {
-//             var flag = true; //验证分片是否完成上传了。
-//             for (var i = 0; i < missChunks.length; i++) {
-//                 if (blockChunk == missChunks[i]) {
-//                     console.log(file.name + ":" + blockChunk + ":还没上传，现在上传去吧。");
-//                     flag = false;
-//                     break;
-//                 }
-//             }
-//             if (flag) {
-//                 task.reject();
-//             } else {
-//                 task.resolve();
-//             }
-//         } else {
-//             task.resolve();
-//         }
-//         // 返回回调方法
-//         return jQuery.when(task);
-//     }
-// });
-// // 实例化
-// var uploader = WebUploader.create({
-//     pick: {
-//         id: '#uploadInfoBtn',
-//         label: '点击选择文件'
-//     },
-//     formData: {
-//         uid: 0,
-//         md5: '',
-//         chunkSize: chunkSize
-//     },
-//     //dnd: '#dndArea',  // 指定接受拖拽上传的容器
-//     //paste: '#uploader',   //指定复制粘贴的容器
-//     swf: 'webuploader/js/Uploader.swf',
-//     chunked: true, //分片上传
-//     chunkSize: chunkSize, // 字节 1M分块
-//     threads: 3, //当前为3个线程同时请求到达
-//     chunkRetry:5, // 自动重连5次
-//     server: javafile + '/Md5File/fileUpload', //上传的路径
-//     auto: true, // 是否自动上传
-//     // duplicate : true, //去重， 根据文件名字、文件大小和最后修改时间来生成hash Key.
-//     disableGlobalDnd: true,// 禁掉全局的拖拽功能。这样不会出现图片拖进页面的时候，把图片打开。
-//     fileNumLimit: 1024,     // 队列最大限制总数量
-//     fileSizeLimit: 1024 * 1024 * 1024 * 1024,    // 200 M队列总大小
-//     fileSingleSizeLimit: 1024 * 1024 * 1024 * 1024   // 50 M 单个文件大小限制
-// });
-// // 当有文件被添加进队列的时候
-// uploader.on('fileQueued', function (file) {
-//     fileTosast("正在加入队列" + file.name);
-//     // 第一次发出请求要数据库 文件对象 如果是实时的需要添加钩子（*）
-//     uploadParams.filename = file.name;  //文件名称
-//     uploadParams.size = (file.size / 1024); // 文件大小
-//     uploadParams.filetype = file.ext;   //文件类型
-//     var obj = {};
-//     //处理参数
-//     obj.upId = file.id;  //文件id
-//     obj.id = file.id // 文件队列中id
-//     obj.fileType = file.ext;  //文件类型
-//     obj.fileName = file.name;  // 文件名称
-//     obj.fileSize = (file.size / 1024); // 文件大小
-//     obj.filepath = ""; //文件地址
-//     obj.status = 4; // 文件上传状态
-//     obj.optype = 1; //新增文件
-//     addFileHtml(obj); //生成html
-// });
-// //当文件被删除队列的时候触发
-// uploader.on('fileDequeued', function (file) {
-//     console.log(file);
-//
-// });
-// //当某个文件的分块在发送前触发，主要用来询问是否要添加附带参数，大文件在开起分片上传的前提下此事件可能会触发多次。
-// uploader.onUploadBeforeSend = function (obj, data) {
-//     console.log("onUploadBeforeSend");
-//     var file = obj.file;
-//     console.log(obj);
-//     data.md5 = file.md5 || ''; //会出现空值需要看一下
-//     data.uid = file.uid;
-//     var dataBaseFileObj = getOneFileObj(file);
-//     if (dataBaseFileObj == null) {
-//         console.log("文件丢失");
-//         return;
-//     }
-//     data.orgid = sysUserInfo.organization_ID;     // 企业id
-//     data.orgname = sysUserInfo.organization_Name;     // 企业名称
-//     data.userid = sysUserInfo.user_ID;   // 用户id
-//     data.username = sysUserInfo.user_Name;  //  用户名称
-//     data.status = 2;
-//     data.optype = 1;    // 操作类型
-//     data.upid = dataBaseFileObj.upId;
-//     data.ziid = dataBaseFileObj.fileid;    // 子表id
-//     data.fid = dataBaseFileObj.fid; // 父级id
-//     data.fpath = dataBaseFileObj.filepath;  // 父级路径
-//
-// };
-// // 上传中
-// uploader.on('uploadProgress', function (file, percentage) {
-//     getProgressBar(file, percentage,"上传");
-// });
-// // 上传成功返回结果
-// uploader.on('uploadSuccess', function (file) {
-//     var text = '已上传';
-//     if (file.pass) {
-//         text = "文件秒传功能，文件已上传。"
-//     }
-//     updataFile(file, 0);
-//     uploader.removeFile(file, true);
-//     //$('#' + file.id).find('p.state').text(text);
-//     console.log('uploadSuccess chenggong', file);
-//     jQuery('#' + file.upId + ' .jindu').html('<i class="iconfont" style="color: green">&#xe772;</i>成功 ');
-//
-// });
-// // 上传失败
-// uploader.on('uploadError', function (file, reason) {
-//     console.log('uploadError shibai', file, reason);
-//     if (reason == "abort") {
-//         jQuery('#' + file.upId + ' .jindu').html('<div onclick="fileRetry()"><i class="iconfont" style="color: red" >&#xe6b9;</i> 中断</div> ');
-//         return;
-//     }
-//     updataFile(file, 3);
-//     uploader.removeFile(file, true);
-//     jQuery('#' + file.upId + ' .jindu').html('<i class="iconfont" style="color: red">&#xe6b9;</i> 失败 ' + reason);
-//     //$('#' + file.id).find('p.state').text('上传出错');
-// });
-// // 上传完成
-// uploader.on('uploadComplete', function (file) {
-//     console.log('uploadComplete wancheng', file);
-//     // 隐藏进度条
-//     fadeOutProgress(file);
-//     fileTosast(""); //清空消息
-//     //$successUpFileNum.html(parseInt($successUpFileNum.html()) + 1);
-//     // 计算进度
-//     //allProgress();
-//     //$('#' + file.id + ' .jindu').html('<i class="iconfont" style="color: #39f">&#xe781;</i> 正在转化');
-//     // fadeOutProgress(file, 'FILE');
-// });
-//
-//
-//
-//
-//
-//
-// /**
-// 重试上传
-// @file 出错文件
-// */
-// function fileRetry() {
-//     uploader.retry();
-// }
-//
-// /**
-// *  生成进度条封装方法
-// * @param file 文件
-// * @param percentage 进度值
-// * @param titleName 标题名
-// */
-// function getProgressBar(file, percentage, titleName) {
-//     var $li = jQuery('#' + file.upId); // 当前文件
-//     var $td = jQuery('#' + file.upId + ' .jindu');
-//     var $childProgress = $li.find('.progress');   //进度条
-//     var $childProgressflag = $td.find('#' + file.upId + '-progress-bar');   //进度条
-//     var $childProgressText = $td.find('#' + file.upId + 'progress-text'); // 进度内容
-//     // 避免重复创建 进度条
-//     if (!$childProgressflag.length) {
-//         $td.html("");
-//         $childProgressflag = jQuery('<div id="' + file.upId + '-progress"><span id="' + file.upId + 'progress-text">0%</span><br /><span class="progress" style="display:none;"><span style="width: 0%" class="progress-bar" id="' + file.upId + '-progress-bar"></span></span></div>').appendTo($td).find('#' + file.upId + '-progress-bar');
-//     }
-//     // 进度计算
-//     var progressPercentage = (percentage * 100).toFixed(2) + '%';
-//     // 修改进度条的样式
-//     $childProgress.css('width', progressPercentage);
-//     // 填充进度条的文字
-//     $childProgressText.html(titleName + ":" + parseInt(percentage * 100));
-// }
-//
-//
-// /**
-// * 隐藏进度条
-// * @param file 文件对象
-// */
-// function fadeOutProgress(file, id_Prefix) {
-//     jQuery('#' + file.upId).find('.progress').css('width', '0%'); // 当前文件
-//     //$('#' + file.upId + '-progress').fadeOut();
-// }
-// /**
-//    隐藏删除按钮
-// */
-// function hideDelBtn(file) {
-//     var $tr = $('#' + file.upId);
-//     var $td = $tr.find(".delete");
-//     $td.hide(); // 隐藏
-// }
-// /**
-//     查找第一上传后的文件对象
-//     @file
-// */
-// function getOneFileObj(file ) {
-//     var obj = null;
-//     countUpFile.forEach(function (item, ind) {
-//         if (item.upId == file.upId) {
-//             obj = item;
-//         }
-//     });
-//     return obj;
-// }
-// /**
-//     生成html
-// */
-// function addFileHtml(item) {
-//     var statusHtml = "等待";
-//     switch (parseInt(item.status)) {
-//         case 4: //等待上传
-//         statusHtml = '等待';
-//         break;
-//         case 3: //失败
-//         statusHtml = '<i class="iconfont" style="color: red" >&#xe6b9;</i> 失败';
-//         break;
-//         case 2: //正在进行中
-//         statusHtml = '<i class="iconfont" style="color: red" >&#xe6b9;</i> 未完';
-//         break;
-//         case 1: // 转换失败
-//         statusHtml = '<i class="iconfont" style="color: red" >&#xe6b9;</i> 失败';
-//         break;
-//         case 0: //成功
-//         statusHtml = '<i class="iconfont" style="color: green">&#xe772;</i>成功';
-//         break;
-//
-//     }
-// $htmlUploadListBody.append('<li class="card-header item-content" id="' + item.upId + '">' +
-//         '<div class="progress"></div>'+
-//         '<div style="text-align: center;width:35%;"><marquee direction="right">' + (item.optype == 1 ? '新增' : '更新') + item.fileName + '</marquee></div>' +
-//         '<div style="text-align: center;width:15%">' + getFileSize(item.fileSize) + '</div>' +
-//         '<div style="text-align: center;width:20%">' + (item.filepath == null || item.filepath == '/' ? "/" : item.filepath) + '</div>' +
-//         '<div style="text-align: center;width:25%" class="jindu">'+statusHtml+'</div> ' +
-//         '<div style="text-align: center;width:5%" class="xuanzhuan-45" onclick=\'delSelectFileObj('+JSON.stringify(item)+')\'>+</div>' +
-//     '</li>');
-// }
-// /**
-//   添加文件记录进度
-//   @ file 文件对象
-//   @ flag 是否更新进度
-// */
-// function addFile(file,flag){
-//     var isExist = false;
-//     // 判断文件是否存在
-//     countUpFile.forEach(function(item,index){
-//         if(item.upId == file.upId){
-//             isExist == true;
-//             return;
-//         }
-//     });
-//     //id 文件id name 文件名 size 文件大小 fpath 父级目录 state 文件状态 0传输完毕 1传输中 type 文件类型
-//     countUpFile.push(file);
-//     //消息提醒
-//     fileTosast("开始上传"+file.fileName);
-//     //allProgress();
-// }
-// /**
-//     文件更新 状态只有完成
-// */
-// function updataFile(file, flag) {
-//     var index = 0;
-//     countUpFile.forEach(function (item, ind) {
-//         if (item.upId == file.upId) {
-//             index = ind;
-//         }
-//     });
-//     countUpFile[index].status = flag; // 文件状态
-//     //allProgress();  //更新进度
-// }
-// /**
-// 队列中移除文件
-// @ id 文件队列id
-// @ upId 文件对象id
-// */
-// function delSelectFileObj(fileobj) {
-//     if (fileobj.id != null && fileobj.id != "null") {   //重新上传 删除的时候这个为空值
-//         console.log(fileobj.id);
-//         // 参数二不传则为暂停上传
-//         try {
-//             uploader.removeFile(fileobj.id, true);
-//         } catch (e) { }
-//     }
-//     // 删除页面上的元素
-//     $("#" + fileobj.upId).remove();
-//     //计算进度
-//     countUpFile.forEach(function (item, index) {
-//         if (item.upId == fileobj.upId) {
-//             countUpFile.splice(index, 1);
-//         }
-//     });
-//     var redisparams = {};
-//     redisparams.upId = fileobj.upId;
-//     redisparams.status = fileobj.status;
-//     redisparams.md5 = fileobj.md5;
-//     redisparams.userid = fileobj.userid;
-//     redisparams.optype = fileobj.optype;
-//     // 清楚redis的数据
-//     getAjax(javaserver + "/Kapi/delcachefiles", redisparams, function (data) {
-//         if (data.errorcode != "0") {
-//             $.toast('删除失败！');
-//         }
-//     }, function () {  //上传失败
-//     }, "json", "post");
-//     //allProgress();
-// }
-//
-//
-// /**
-// 总进度计算
-// */
-// function allProgress() {
-//     $successUpFileNum.html(0);  //初始化完成数
-//     // 总文件数
-//     $countUpFileNum.html(countUpFile.length);
-//     countUpFile.forEach(function(item,index){
-//         if (item.status == 0) {
-//             // 上传完毕文件数
-//             $successUpFileNum.html(parseInt($successUpFileNum.html()) + 1);
-//         }
-//     });
-//     var allProgressNum = parseInt($successUpFileNum.html()) / parseInt($countUpFileNum.html());
-//     jQuery('#all-progress-bar').css('width', (allProgressNum * 100).toFixed(2) + '%');
-// }
-//
-// //关闭文件上传
-// function closeFilePanel(title){
-//     $('.title').html(title);
-//     $.closeModal('.popup-file');
-// }
-// //左侧打开文件上传
-// $(document).on('click','#open-file', function () {
-//     // 关闭左侧
-//     $.closePanel();
-//     // 弹出上传层 上传到根目录
-//     fileOnload($(".title").html(),0,null);
-// });
-//
-// // 文件提示
-// function fileTosast(msg){
-//     var $fileMsg = jQuery('.fileMsg');
-//     var $fileMsgTxt = jQuery('.fileMsgTxt');
-//     var $uploadFileText = jQuery("#uploadFileText");
-//     if (msg == undefined || msg == null || msg == "") {
-//         $uploadFileText.html("选择上传文件");
-//         //$fileMsg.hide();
-//     } else {
-//         //$fileMsg.show();
-//         $uploadFileText.html(msg);
-//         $fileMsgTxt.html(msg);
-//     }
-//
-// }
+
+function fileOnload(title, fid, fpath) {
+    $('#popup-file-close').attr('onClick', 'closeFilePanel("' + title + '")');
+    $('.title').html("上传文件列表");
+    $.popup('.popup-file');
+    if(fid == undefined || fid == null || fid == "")
+    fid =0;
+    if(fpath == undefined || fpath == null || fpath == "")
+    fpath = "/";
+    fileInit(fid,fpath); // 文件上传初始化
+    console.log("hello file");
+
+}
+/*******************************文件搜索*********************************************/
+function showSoInupt(index){
+    //显示搜索框
+    if(index==1){
+         $("#SosoShow").show();
+         $("#searchFileName").focus();
+    }else{
+         $("#SosoShow").hide();
+         getfilelist(0, "", "", "", 2, 20,1, true);
+    }
+}
+
+var chunkSize = 1024 * 1024*10;    //以后端的约定  分片的大小
+// 获取用户信息
+var sysUserInfo = strToJson(GetlocalStorage("userinfo"));
+var uploadParams = {}; //上传参数
+var $htmlUploadListBody = $('#htmlUploadListBody'); // 上传列表
+//var $countUpFileNum = $("#countUpFileNum"); //上传的总文件数
+var countUpFile = []; // 一共上传中的文件 id 文件id name 文件名 size 文件大小 fpath 父级目录 state 文件状态 type 文件类型
+//var $successUpFileNum = $("#successUpFileNum"); // 上传完成了文件数
+// 初始化参数
+function fileInit(fid,fpath) {
+    sysUserInfo = strToJson(GetlocalStorage("userinfo"));
+    $htmlUploadListBody = $('#htmlUploadListBody'); // 上传列表
+    uploadParams = {     //请求参数
+        upid: "",       // 文件id 可空
+        status: 4,     // 文件状态 0成功 1转码失败 2上传中 3上传失败
+        fid: fid == 0 ? 0 : fid,        // 文件父级id
+        fpath: fpath == null?"/":fpath,      // 文件父级地址
+        filename: "",       // 文件名称
+        filetype: "",       //文件类型
+        size: "",           // 文件大小
+        optype: 1,   // 文件上传
+        orgid: sysUserInfo.organization_ID,            // 企业id
+        orgname: sysUserInfo.organization_Name,        // 企业名称
+        userid: sysUserInfo.user_ID,                    // 用户id
+        username: sysUserInfo.user_Name               //  用户名称
+    }
+    fileTosast("");
+    $.showIndicator();
+    // 获取这个人之前上传的数据
+    getAjax(javafile + "/Md5File/findRedissFile", { userid: sysUserInfo.user_ID }, function (response) {
+        $.hideIndicator();
+        $htmlUploadListBody.html("");
+        if (response.errorcode == 0) {
+            response.datas.forEach(function (item, ind) { // 路径需要处理
+                //处理参数
+                item.id = null; //队列id
+                item.upId = item.upid;  //文件id
+                item.fileType = item.filetype;  //文件类型
+                item.fileName = item.filename;  // 文件名称
+                item.fileSize = item.size; // 文件大小
+                item.filepath = item.fpath; //文件地址
+                addFileHtml(item); //生成html
+            });
+            countUpFile = response.datas;
+        }
+    },"","json");
+}
+// 打开选择文件初始化请求参数
+function openUploadFile() {
+    //fileTosast("打开");
+    // 调用单击事件
+    document.getElementById("uploadInfoBtn").childNodes[1].childNodes[1].click();
+}
+
+// HOOK 这个必须要再uploader实例化前面
+WebUploader.Uploader.register({
+    'before-send-file': 'beforeSendFile',
+    'before-send': 'beforeSend'
+}, {
+    //add-file(files): File对象或者File数组	用来向队列中添加文件。
+    //before-send-file	(file) file : 对象    在文件发送之前request，此时还没有分片（如果配置了分片的话），可以用来做文件整体md5验证。
+    //before-send(block)	block: 分片对象	   在分片发送之前request，可以用来做分片验证，如果此分片已经上传成功了，可返回一个rejected promise来跳过此分片上传
+    //after-send-file(file): File对象	在所有分片都上传完毕后，且没有错误后request，用来做分片验证，此时如果promise被reject，当前文件上传会触发错误。
+    beforeSendFile: function (file) {
+        console.log("beforeSendFile");
+        // Deferred对象在钩子回掉函数中经常要用到，用来处理需要等待的异步操作。
+        var task = new jQuery.Deferred();
+        // 根据文件内容来查询MD5
+        uploader.md5File(file).progress(function (percentage) {   // 及时显示进度
+            fileTosast("正在加入队列" + file.name + "..." + parseInt(percentage * 100));
+            console.log('计算md5进度:', percentage);
+            getProgressBar(file, percentage, "MD5");
+        }).then(function (val) { // 完成
+            console.log('md5 result:', val);
+            fileTosast("");
+            file.md5 = val;
+            // 模拟用户id
+            // file.uid = new Date().getTime() + "_" + Math.random() * 100;
+            file.uid = WebUploader.Base.guid();
+            // 创建文件对象
+            // 第一次发出请求要数据库 文件对象 如果是实时的需要添加钩子（*）
+            uploadParams.filename = file.name;  //文件名称
+            uploadParams.size = (file.size / 1024); // 文件大小
+            uploadParams.filetype = file.ext;   //文件类型
+            uploadParams.md5 = val;
+            getAjax(javaserver + "/Kapi/upfiles", uploadParams, function (response) {
+                countUpFile.forEach(function (item, index) {
+                    if (item.upId == file.id) {
+                        countUpFile.splice(index, 1);
+                    }
+                });
+                $("#"+file.id).remove();
+                //计算进度
+                console.log("文件对象获取：" + response);         // 30 更新子版本
+                // 不存在
+                var responseIsExist = true;
+                if (response.errorcode == "0") {
+                    //文件唯一id赋值
+                    file.upId = response.data.upId;
+                } else if (response.errorcode == "30") {
+                    //更新文件
+                    file.upId = response.data.id;
+                }
+                // 判断文件是否存在
+                countUpFile.forEach(function (item, index) {
+                    if (item.upId == response.data.upId) {
+                        responseIsExist = false;
+                    }
+                });
+                if (responseIsExist) {
+                    var obj = response.data;
+                    obj.md5 = val;
+                    if (response.errorcode == "0") { // 获取对象成功
+
+                        //处理参数
+                        obj.id = file.id; //文件队列中id
+                        obj.status = 4; //文件上传状态
+                        obj.optype = 1; //文件上传
+                        addFileHtml(obj); //生成html
+                        // 添加文件
+                        addFile(obj, true);
+                    } else if (response.errorcode == "30") { // 暂时复杂  更新子版本
+                        //处理参数
+                        obj.upId = obj.id;  //文件id
+                        obj.id = file.id // 文件队列中id
+                        obj.fileType = obj.Extended;  //文件类型
+                        obj.fileName = obj.Name;  // 文件名称
+                        obj.fileSize = obj.Size; // 文件大小
+                        obj.filepath = ""; //文件地址
+                        obj.status = 4; // 文件上传状态
+                        obj.optype = 2; //更新文件
+                        addFileHtml(obj); //生成html
+                        // 添加文件
+                        addFile(obj, true);
+
+                    }else if (response.errorcode == "39") {    // 文件空间超出最大限制
+                       $.prompt('存储空间超过最大限制','', function (value) {
+                        },null,'警告');
+                        task.reject();
+                    }
+                }
+                // 进行md5判断
+                getAjax(javafile + "/Md5File/checkFileMd5", { userid: sysUserInfo.user_ID, md5: file.md5 }, function (data) {
+                    // 返回的状态码
+                    status = data.errorcode;
+                    console.log(data.errormsg);
+                    task.resolve();
+                    if (status == 101) {
+                        // 文件不存在，那就正常流程
+                    } else if (status == 100) {
+                        // 忽略上传过程，直接标识上传成功；文件已经上传
+                        uploader.skipFile(file);
+                        file.pass = true;
+                    } else if (status == 102) {
+                        // 部分已经上传到服务器了，但是差几个模块。
+                        console.log(data.datas);
+                        file.missChunks = data.datas;
+                    }
+                }, function () {  //上传失败
+                    task.reject();
+                    // 参数二不传则为暂停上传
+                    //uploader.removeFile(file, true);
+                    $('#' + file.upId + ' .jindu').html('<div onclick="fileRetry()"><i class="iconfont" style="color: red" >&#xe6b9;</i> 上传中断</div> ');
+                }, "json", "post");
+
+            }, function () {
+                task.reject();
+                console.log("文件异常");
+                fileTosast("文件异常");
+                // 参数二不传则为暂停上传
+                uploader.removeFile(file, true);
+
+            },"json");
+            // 日志
+            console.log("beforeSendFile", file, uploader);
+        });
+        return jQuery.when(task);
+    },
+    beforeSend: function (block) {
+        console.log("block")
+        var task = new jQuery.Deferred();
+        var file = block.file;
+        var missChunks = file.missChunks;
+        var blockChunk = block.chunk;
+        console.log("当前分块：" + blockChunk);
+        console.log("missChunks:" + missChunks);
+        if (missChunks !== null && missChunks !== undefined && missChunks !== '') {
+            var flag = true; //验证分片是否完成上传了。
+            for (var i = 0; i < missChunks.length; i++) {
+                if (blockChunk == missChunks[i]) {
+                    console.log(file.name + ":" + blockChunk + ":还没上传，现在上传去吧。");
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                task.reject();
+            } else {
+                task.resolve();
+            }
+        } else {
+            task.resolve();
+        }
+        // 返回回调方法
+        return jQuery.when(task);
+    }
+});
+// 实例化
+var uploader = WebUploader.create({
+    pick: {
+        id: '#uploadInfoBtn',
+        label: '点击选择文件'
+    },
+    formData: {
+        uid: 0,
+        md5: '',
+        chunkSize: chunkSize
+    },
+    //dnd: '#dndArea',  // 指定接受拖拽上传的容器
+    //paste: '#uploader',   //指定复制粘贴的容器
+    swf: 'webuploader/js/Uploader.swf',
+    chunked: true, //分片上传
+    chunkSize: chunkSize, // 字节 1M分块
+    threads: 3, //当前为3个线程同时请求到达
+    chunkRetry:5, // 自动重连5次
+    server: javafile + '/Md5File/fileUpload', //上传的路径
+    auto: true, // 是否自动上传
+    // duplicate : true, //去重， 根据文件名字、文件大小和最后修改时间来生成hash Key.
+    disableGlobalDnd: true,// 禁掉全局的拖拽功能。这样不会出现图片拖进页面的时候，把图片打开。
+    fileNumLimit: 1024,     // 队列最大限制总数量
+    fileSizeLimit: 1024 * 1024 * 1024 * 1024,    // 200 M队列总大小
+    fileSingleSizeLimit: 1024 * 1024 * 1024 * 1024   // 50 M 单个文件大小限制
+});
+// 当有文件被添加进队列的时候
+uploader.on('fileQueued', function (file) {
+    fileTosast("正在加入队列" + file.name);
+    // 第一次发出请求要数据库 文件对象 如果是实时的需要添加钩子（*）
+    uploadParams.filename = file.name;  //文件名称
+    uploadParams.size = (file.size / 1024); // 文件大小
+    uploadParams.filetype = file.ext;   //文件类型
+    var obj = {};
+    //处理参数
+    obj.upId = file.id;  //文件id
+    obj.id = file.id // 文件队列中id
+    obj.fileType = file.ext;  //文件类型
+    obj.fileName = file.name;  // 文件名称
+    obj.fileSize = (file.size / 1024); // 文件大小
+    obj.filepath = ""; //文件地址
+    obj.status = 4; // 文件上传状态
+    obj.optype = 1; //新增文件
+    addFileHtml(obj); //生成html
+});
+//当文件被删除队列的时候触发
+uploader.on('fileDequeued', function (file) {
+    console.log(file);
+
+});
+//当某个文件的分块在发送前触发，主要用来询问是否要添加附带参数，大文件在开起分片上传的前提下此事件可能会触发多次。
+uploader.onUploadBeforeSend = function (obj, data) {
+    console.log("onUploadBeforeSend");
+    var file = obj.file;
+    console.log(obj);
+    data.md5 = file.md5 || ''; //会出现空值需要看一下
+    data.uid = file.uid;
+    var dataBaseFileObj = getOneFileObj(file);
+    if (dataBaseFileObj == null) {
+        console.log("文件丢失");
+        return;
+    }
+    data.orgid = sysUserInfo.organization_ID;     // 企业id
+    data.orgname = sysUserInfo.organization_Name;     // 企业名称
+    data.userid = sysUserInfo.user_ID;   // 用户id
+    data.username = sysUserInfo.user_Name;  //  用户名称
+    data.status = 2;
+    data.optype = 1;    // 操作类型
+    data.upid = dataBaseFileObj.upId;
+    data.ziid = dataBaseFileObj.fileid;    // 子表id
+    data.fid = dataBaseFileObj.fid; // 父级id
+    data.fpath = dataBaseFileObj.filepath;  // 父级路径
+
+};
+// 上传中
+uploader.on('uploadProgress', function (file, percentage) {
+    getProgressBar(file, percentage,"上传");
+});
+// 上传成功返回结果
+uploader.on('uploadSuccess', function (file) {
+    var text = '已上传';
+    if (file.pass) {
+        text = "文件秒传功能，文件已上传。"
+    }
+    updataFile(file, 0);
+    uploader.removeFile(file, true);
+    //$('#' + file.id).find('p.state').text(text);
+    console.log('uploadSuccess chenggong', file);
+    jQuery('#' + file.upId + ' .jindu').html('<i class="iconfont" style="color: green">&#xe772;</i>成功 ');
+
+});
+// 上传失败
+uploader.on('uploadError', function (file, reason) {
+    console.log('uploadError shibai', file, reason);
+    if (reason == "abort") {
+        jQuery('#' + file.upId + ' .jindu').html('<div onclick="fileRetry()"><i class="iconfont" style="color: red" >&#xe6b9;</i> 中断</div> ');
+        return;
+    }
+    updataFile(file, 3);
+    uploader.removeFile(file, true);
+    jQuery('#' + file.upId + ' .jindu').html('<i class="iconfont" style="color: red">&#xe6b9;</i> 失败 ' + reason);
+    //$('#' + file.id).find('p.state').text('上传出错');
+});
+// 上传完成
+uploader.on('uploadComplete', function (file) {
+    console.log('uploadComplete wancheng', file);
+    // 隐藏进度条
+    fadeOutProgress(file);
+    fileTosast(""); //清空消息
+    //$successUpFileNum.html(parseInt($successUpFileNum.html()) + 1);
+    // 计算进度
+    //allProgress();
+    //$('#' + file.id + ' .jindu').html('<i class="iconfont" style="color: #39f">&#xe781;</i> 正在转化');
+    // fadeOutProgress(file, 'FILE');
+});
+
+
+
+
+
+
+/**
+重试上传
+@file 出错文件
+*/
+function fileRetry() {
+    uploader.retry();
+}
+
+/**
+*  生成进度条封装方法
+* @param file 文件
+* @param percentage 进度值
+* @param titleName 标题名
+*/
+function getProgressBar(file, percentage, titleName) {
+    var $li = jQuery('#' + file.upId); // 当前文件
+    var $td = jQuery('#' + file.upId + ' .jindu');
+    var $childProgress = $li.find('.progress');   //进度条
+    var $childProgressflag = $td.find('#' + file.upId + '-progress-bar');   //进度条
+    var $childProgressText = $td.find('#' + file.upId + 'progress-text'); // 进度内容
+    // 避免重复创建 进度条
+    if (!$childProgressflag.length) {
+        $td.html("");
+        $childProgressflag = jQuery('<div id="' + file.upId + '-progress"><span id="' + file.upId + 'progress-text">0%</span><br /><span class="progress" style="display:none;"><span style="width: 0%" class="progress-bar" id="' + file.upId + '-progress-bar"></span></span></div>').appendTo($td).find('#' + file.upId + '-progress-bar');
+    }
+    // 进度计算
+    var progressPercentage = (percentage * 100).toFixed(2) + '%';
+    // 修改进度条的样式
+    $childProgress.css('width', progressPercentage);
+    // 填充进度条的文字
+    $childProgressText.html(titleName + ":" + parseInt(percentage * 100));
+}
+
+
+/**
+* 隐藏进度条
+* @param file 文件对象
+*/
+function fadeOutProgress(file, id_Prefix) {
+    jQuery('#' + file.upId).find('.progress').css('width', '0%'); // 当前文件
+    //$('#' + file.upId + '-progress').fadeOut();
+}
+/**
+   隐藏删除按钮
+*/
+function hideDelBtn(file) {
+    var $tr = $('#' + file.upId);
+    var $td = $tr.find(".delete");
+    $td.hide(); // 隐藏
+}
+/**
+    查找第一上传后的文件对象
+    @file
+*/
+function getOneFileObj(file ) {
+    var obj = null;
+    countUpFile.forEach(function (item, ind) {
+        if (item.upId == file.upId) {
+            obj = item;
+        }
+    });
+    return obj;
+}
+/**
+    生成html
+*/
+function addFileHtml(item) {
+    var statusHtml = "等待";
+    switch (parseInt(item.status)) {
+        case 4: //等待上传
+        statusHtml = '等待';
+        break;
+        case 3: //失败
+        statusHtml = '<i class="iconfont" style="color: red" >&#xe6b9;</i> 失败';
+        break;
+        case 2: //正在进行中
+        statusHtml = '<i class="iconfont" style="color: red" >&#xe6b9;</i> 未完';
+        break;
+        case 1: // 转换失败
+        statusHtml = '<i class="iconfont" style="color: red" >&#xe6b9;</i> 失败';
+        break;
+        case 0: //成功
+        statusHtml = '<i class="iconfont" style="color: green">&#xe772;</i>成功';
+        break;
+
+    }
+$htmlUploadListBody.append('<li class="card-header item-content" id="' + item.upId + '">' +
+        '<div class="progress"></div>'+
+        '<div style="text-align: center;width:35%;"><marquee direction="right">' + (item.optype == 1 ? '新增' : '更新') + item.fileName + '</marquee></div>' +
+        '<div style="text-align: center;width:15%">' + getFileSize(item.fileSize) + '</div>' +
+        '<div style="text-align: center;width:20%">' + (item.filepath == null || item.filepath == '/' ? "/" : item.filepath) + '</div>' +
+        '<div style="text-align: center;width:25%" class="jindu">'+statusHtml+'</div> ' +
+        '<div style="text-align: center;width:5%" class="xuanzhuan-45" onclick=\'delSelectFileObj('+JSON.stringify(item)+')\'>+</div>' +
+    '</li>');
+}
+/**
+  添加文件记录进度
+  @ file 文件对象
+  @ flag 是否更新进度
+*/
+function addFile(file,flag){
+    var isExist = false;
+    // 判断文件是否存在
+    countUpFile.forEach(function(item,index){
+        if(item.upId == file.upId){
+            isExist == true;
+            return;
+        }
+    });
+    //id 文件id name 文件名 size 文件大小 fpath 父级目录 state 文件状态 0传输完毕 1传输中 type 文件类型
+    countUpFile.push(file);
+    //消息提醒
+    fileTosast("开始上传"+file.fileName);
+    //allProgress();
+}
+/**
+    文件更新 状态只有完成
+*/
+function updataFile(file, flag) {
+    var index = 0;
+    countUpFile.forEach(function (item, ind) {
+        if (item.upId == file.upId) {
+            index = ind;
+        }
+    });
+    countUpFile[index].status = flag; // 文件状态
+    //allProgress();  //更新进度
+}
+/**
+队列中移除文件
+@ id 文件队列id
+@ upId 文件对象id
+*/
+function delSelectFileObj(fileobj) {
+    if (fileobj.id != null && fileobj.id != "null") {   //重新上传 删除的时候这个为空值
+        console.log(fileobj.id);
+        // 参数二不传则为暂停上传
+        try {
+            uploader.removeFile(fileobj.id, true);
+        } catch (e) { }
+    }
+    // 删除页面上的元素
+    $("#" + fileobj.upId).remove();
+    //计算进度
+    countUpFile.forEach(function (item, index) {
+        if (item.upId == fileobj.upId) {
+            countUpFile.splice(index, 1);
+        }
+    });
+    var redisparams = {};
+    redisparams.upId = fileobj.upId;
+    redisparams.status = fileobj.status;
+    redisparams.md5 = fileobj.md5;
+    redisparams.userid = fileobj.userid;
+    redisparams.optype = fileobj.optype;
+    // 清楚redis的数据
+    getAjax(javaserver + "/Kapi/delcachefiles", redisparams, function (data) {
+        if (data.errorcode != "0") {
+            $.toast('删除失败！');
+        }
+    }, function () {  //上传失败
+    }, "json", "post");
+    //allProgress();
+}
+
+
+/**
+总进度计算
+*/
+function allProgress() {
+    $successUpFileNum.html(0);  //初始化完成数
+    // 总文件数
+    $countUpFileNum.html(countUpFile.length);
+    countUpFile.forEach(function(item,index){
+        if (item.status == 0) {
+            // 上传完毕文件数
+            $successUpFileNum.html(parseInt($successUpFileNum.html()) + 1);
+        }
+    });
+    var allProgressNum = parseInt($successUpFileNum.html()) / parseInt($countUpFileNum.html());
+    jQuery('#all-progress-bar').css('width', (allProgressNum * 100).toFixed(2) + '%');
+}
+
+//关闭文件上传
+function closeFilePanel(title){
+    $('.title').html(title);
+    $.closeModal('.popup-file');
+}
+//左侧打开文件上传
+$(document).on('click','#open-file', function () {
+    // 关闭左侧
+    $.closePanel();
+    // 弹出上传层 上传到根目录
+    fileOnload($(".title").html(),0,null);
+});
+
+// 文件提示
+function fileTosast(msg){
+    var $fileMsg = jQuery('.fileMsg');
+    var $fileMsgTxt = jQuery('.fileMsgTxt');
+    var $uploadFileText = jQuery("#uploadFileText");
+    if (msg == undefined || msg == null || msg == "") {
+        $uploadFileText.html("选择上传文件");
+        //$fileMsg.hide();
+    } else {
+        //$fileMsg.show();
+        $uploadFileText.html(msg);
+        $fileMsgTxt.html(msg);
+    }
+
+}
+
+
+
+
+
 /***************************************************************************/
 //个人信息保存
 /**************************************************************************/
@@ -2482,8 +2533,6 @@ function isNull(text){
 
 }
 
-
-
 /***************************************************************************/
 //课程收藏的加载事件
 /**************************************************************************/
@@ -2620,7 +2669,7 @@ $(document).on("pageInit", "#livedetail", function(e, id, $page) {
     var roomid = liveInfoObj.roomid;
     var rtmpUrl = liveInfoObj.playrmtpurl;
     var luzhi_url = liveInfoObj.luzhi_url; //回放地址
-    BaiDuPlayer .play("","", rtmpUrl);
+    BaiDuPlayer.play("","", rtmpUrl);
     flashvars = {
         rooid: "",
         rid: roomid,
@@ -2636,8 +2685,763 @@ $(document).on("pageInit", "#livedetail", function(e, id, $page) {
         teacherid: "",
         ms: "v"    //v 声音 s 视频
     };
+    setTimeout(function(){
     Messaging.initMsg(flashvars);
+    }, 3000);
+
 });
+
+/**********人员管理界面初始化start***********/
+/** 人员列表初始化 **/
+$(document).on("pageInit", "#usermanager", function(e, id, $page) {
+    $("title").html("人员管理");
+    //登录用户
+    sysUserInfo=getUserInfo();
+    //请求,第一次加载  替换页面
+    if(sysUserInfo.powerLV != "99"){
+      ManagerGetUserList(1, 20);
+    }else {
+      $("#userlistnodate").html("<p style='color:red;'>您暂无权限！</p>");
+    }
+});
+//加载更多
+function GetMoreUser(){
+  var pageIndex=$("#pageIndex").html();
+  pageIndex=parseInt(pageIndex)+1;
+  ManagerGetUserList(pageIndex, 20);
+}
+///获取人员列表
+function ManagerGetUserList(pageIndex, pageSize, flag){
+  getAjax(javaserver + "/PersonnelManagement/PersonnelGetList", {userId:sysUserInfo.user_ID, powerLV:sysUserInfo.powerLV, organization_ID: sysUserInfo.organization_ID,pageIndex:pageIndex, pageSize:pageSize, }, function (data) {
+      data = strToJson(data);
+      if (data.errorcode == 0 && data.datas.length > 0) {
+          var block = "";
+          for (var i = 0; i < data.datas.length; i++) {
+              block+="<li class=\'item-content\' data='"+data.datas[i].user_ID+"'><div class=\'item-media\' style='width:100%;'><img src=\'"+data.datas[i].user_Img+"\'</div><div class=\'item-inner\'><div class=\'item-title\' style='margin-left:0.5rem;'>"+data.datas[i].user_Name+"</div><div class=\"item-after\"></div><a href=\"userdetail.html?userid="+data.datas[i].user_ID+"\" class=\"item-after item-link\" style='padding:0rem 0.2rem;'><i class=\"icon iconfont icon-shangyiye2-copy\"></i></a></div></li>";
+          }
+          if(flag == true){
+            $("#usermanagerlist").html(block);
+          }else {
+            $("#usermanagerlist").append(block);
+          }
+
+          $("#userlistAllCount").text("共" + data.numCount + "人");
+          $("#userlistAllCount").show();
+          $("#pageIndex").html(pageIndex);
+          //隐藏分页
+          if(pageIndex>=data.pageCount){
+              $("#moreuserbtn").hide();
+          }else{
+              $("#moreuserbtn").show();
+          }
+      }else {
+          $.toast('人员加载失败');
+      }
+  });
+}
+/** 人员添加编辑初始化 **/
+$(document).on("pageInit", "#useraddeditform", function(e, id, $page) {
+    $("title").html("添加/编辑人员");
+    //登录用户
+    sysUserInfo=getUserInfo();
+    //请求,第一次加载  替换页面
+    if(sysUserInfo.powerLV != "99"){
+      var userinfoO = GetlocalStorage("ManagerUserIfno");
+      if(userinfoO != null){
+        $(".username").val(userinfoO.user_Name);
+        $(".useraccount").val(userinfoO.user_Account);
+        $(".userpwd").val(userinfoO.user_Pwd);
+        $(".useremail").val(userinfoO.email);
+        $(".userphone").val(userinfoO.phone);
+        //alert(userinfoO.user_Img);
+      }
+    }else {
+      $(".userform").html("<p style='color:red;'>您暂无权限！</p>");
+    }
+});
+function userdetailback(){
+   SetlocalStorage("ManagerUserIfno", "");
+   $.router.back("userlist.html");
+}
+//添加人员
+function  adduserSave(){
+    var id= QueryString("userid");
+    if($(".username").val() == ""){
+      $.toast("姓名不能为空!");
+      return false;
+    }else if($(".useraccount").val() == "") {
+      $.toast("登陆账号不能为空!");
+      return false;
+    }else if($(".userpwd").val() == "") {
+      $.toast("密码不能为空!");
+      return false;
+    }else if($(".userpwd").val().length < 6) {
+      $.toast("密码长度需要大于6");
+      return false;
+    }
+    var userobj = {};
+    if(id == null){
+      id = guid();
+    }
+    userobj = {
+      "user_ID":QueryString("userid"),
+      "organization_ID":sysUserInfo.organization_ID,
+      "organization_Name":sysUserInfo.organization_Name,
+      "user_Account":$(".useraccount").val(),
+      "user_Pwd":$(".userpwd").val(),
+      "powerLV":"99",
+      "user_Name":$(".username").val(),
+      "email":$(".useremail").val(),
+      "phone":$(".userphone").val(),
+      "createUserId":sysUserInfo.user_ID,
+      "createUserName":sysUserInfo.user_Name,
+      "createUserName":sysUserInfo.user_Name,
+      "user_Img":GetlocalStorage("ManagerUserIfno").user_Img
+    };
+    var userOrgList = [{
+      "organization_ID":sysUserInfo.organization_ID,
+      "organization_Name":sysUserInfo.organization_Name
+    }];
+    var userLogList = [{
+      "logText":$(".userremark").val()+""
+    }];
+    getAjax(javaserver + "/PersonnelManagement/PersonnelAddEdit", {loginUserId:sysUserInfo.user_ID, data:JSON.stringify(userobj), userOrgList: userOrgList, userLogList: userLogList}, function (data) {
+        if(strToJson(data).errorcode == "0"){
+          SetlocalStorage("ManagerUserIfno", "");
+          $.toast("操作成功");
+          $.router.back("userlist.html");
+          ManagerGetUserList(1, 20, true);
+        }
+    });
+}
+/** 人员详细界面初始化 **/
+$(document).on("pageInit", "#userdetailF", function(e, id, $page) {
+    $("title").html("人员详细");
+    var ManagerUserIfno = {};
+    if(QueryString("userid") != null){
+      getAjax(javaserver + "/PersonnelManagement/PersonnelGetKey", {user_ID:QueryString("userid")}, function (data) {
+          if(strToJson(data).errorcode == "0"){
+            var userobj = strToJson(data).data;
+            ManagerUserIfno = JSON.stringify(strToJson(data).data);
+            for(var item in userobj){
+                if(item == "state"){
+                    if(userobj[item] == "0"){
+                      $("." + item).text("正常");
+                      $("." + item).css("color", "#6fc743");
+                    }else{
+                      $("." + item).text("锁定");
+                      $("." + item).css("color", "#fd5555");
+                    }
+                }else if(item == "user_Pwd"){
+                    $("." + item).text("******");
+                }else{
+                  $("." + item).text(userobj[item]);
+                }
+            }
+          }
+      });
+    }else {
+        $.toast("信息错误");
+    }
+    //绑定编辑按钮
+    $("#useredit").click(function(){
+      SetlocalStorage("ManagerUserIfno", ManagerUserIfno);
+      $.router.loadPage("userform.html?userid=" + QueryString("userid"));
+    });
+    //绑定删除按钮
+    $(".userdetaildelete").click(function(){
+      $.confirm("确定是否要删除此人信息？", function () {
+          getAjax(javaserver + "/PersonnelManagement/PersonnelDel", {userId:QueryString("userid")}, function (data) {
+              if(strToJson(data).errorcode == "0"){
+                $.toast("删除成功!");
+                $.router.loadPage("userlist.html");
+              }else{
+                $.toast("删除失败,请重试!");
+              }
+          });
+      });
+    });
+});
+/**********人员管理界面初始化end***********/
+/** 公共页面初始化start **/
+$(document).on("pageInit", "#CommonsPage", function(e, id, $page) {
+  $.showPreloader();
+  apiready = function () {
+    var resultUrl = api["pageParam"]["resultUrl"]; //需要跳转的地址
+    $("#CommoniframeId").attr("src", resultUrl);
+    $(".title").html(resultUrl);
+    $(".title").css("left", "25%");
+    var iframe = document.getElementById('CommoniframeId');
+    //监听iframe中页面是否加载完成
+    iframe.addEventListener( "load", function(){
+         //代码能执行到这里说明已经载入成功完毕了
+      $(".title").html(iframe.contentWindow.document.getElementsByTagName("title")[0].innerHTML);
+      $(".title").css("left", "0px");
+      $.hidePreloader();
+      this.removeEventListener( "load", arguments.call, false);  //移除监听
+   }, false);
+  }
+});
+//返回关闭Frame
+function  CloseComHtml() {
+  api.closeFrame({
+    name: 'ComonFrame'
+});
+}
+/** 公共页面初始化End **/
+/** 课程管理页面初始化Start **/
+$(document).on("pageInit", "#coursemanager", function(e, id, $page) {
+  GetCourseList(1, "", "desc");
+  //排序条件
+  $(document).on('click','#course_paixu', function () {
+    var buttons1 = [
+      {
+        text: '课件名称',
+        onClick: function() {
+          GetCourseList(1, "", "desc");
+        }
+      },
+      {
+        text: '课件创建时间倒序',
+        onClick: function() {
+          GetCourseList(1, "searchType:'1'", "desc");
+        }
+      },
+      {
+        text: '课件修改时间倒序',
+        onClick: function(){
+           GetCourseList(1, "searchType:'4'", "desc");
+        }
+      }
+    ];
+    var buttons2 = [
+      {
+        text: '取消',
+        bg: 'danger'
+      }
+    ];
+    var groups = [buttons1, buttons2];
+    $.actions(groups);
+  });
+});
+
+function GetCourseList(pageIndex, params, orderby){
+  sysUserInfo=getUserInfo();
+  var canshu ={userid:sysUserInfo.user_ID,
+      orgid:sysUserInfo.organization_ID,
+      powerLV:sysUserInfo.powerLV,
+      searchType:"1",  //1.文件名称2.文件大小3.文件上传时间4.文件修改时间
+      pageIndex:pageIndex,
+      pageSize:15,
+      orderby:orderby,
+      screenType:"4" //筛选类型(1.录入时间查询 2.教师查询 3.操作人查询 4.课程名称)
+    };
+  if(params == ""){
+    canshu.searchType = "1";
+  }
+  else{
+    canshu.screenType = params.split(":")[1];
+  }
+  $.showIndicator(); //loading
+  getAjax(javaserver + "/course/findCourseinfo",canshu,function(data){
+        var courseArr = strToJson(data);
+        var courseListStr = "";
+        if(courseArr.errorcode == "0"){
+          for(var i = 0; i < courseArr.datas.length; i++){
+            courseListStr += "<li>";
+            courseListStr += "        <a href=\"#\" class=\"item-link item-content\">";
+            var courseimg = courseArr.datas[i].course_img;
+            if(courseimg.indexOf("http://") < 0){
+              courseimg = javafile + courseimg;
+            }
+            courseListStr += "          <div class=\"item-media\"><img src=\""+courseimg+"\" style='width: 4rem;'></div>";
+            courseListStr += "          <div class=\"item-inner\">";
+            courseListStr += "            <div class=\"item-title-row\">";
+            courseListStr += "              <div class=\"item-title\">"+courseArr.datas[i].course_Name+"</div>";
+            courseListStr += "            </div>";
+            courseListStr += "            <div class=\"item-subtitle\"><i class=\"iconfont icon-jiedian1\"></i>"+courseArr.datas[i].course_Sum+"小结<span style='padding:0 0.5rem;'>|</span><i class=\"iconfont icon-anli_renshu_1\"></i>"+courseArr.datas[i].viewCount+"人浏览</div>";
+            courseListStr += "            <div class=\"item-text\"><i class=\"iconfont icon-ren\"></i>"+courseArr.datas[i].create_Name+"<span style='padding:0 0.5rem;'>|</span><i class=\"iconfont icon-shijianaini\"></i>"+courseArr.datas[i].create_Date.split(" ")[0]+"</div>";
+            courseListStr += "          </div>";
+            courseListStr += "        </a>";
+            courseListStr += "      </li>";
+          }
+          $("#pageIndex").html(courseArr.pageIndex);
+          if(courseListStr == ""){ //表示没有数据
+            $("#courselistnodate").show();
+          }else {
+            if(pageIndex == "1"){
+              $("#coursemanagerlist").html(courseListStr);
+            }else {
+              $("#coursemanagerlist").append(courseListStr);
+            }
+            if(pageIndex < courseArr.pageIndex){
+              $("#moreuserbtn").show();
+            }
+          }
+        }
+        $.hideIndicator(); //闅愯棌loading
+  });
+}
+//加载更多课程
+function GetMoreCourse(){
+  var pageIndex = parseInt($("#pageIndex").html()) + 1;
+  GetCourseList(pageIndex, "", "desc");
+}
+
+//课程文本框搜索
+function CourseSearchInput(index){
+    //显示搜索框
+    if(index==1){
+         $("#courseserch").show();
+         $("#searchCourseName").focus();
+    }else{
+         $("#courseserch").hide();
+    }
+}
+//课程列表返回
+function courselistback(){
+  $.showIndicator(); //loading
+  $.router.loadPage("../../home.html#stuInfo");
+  $(".title").html("管理");
+}
+/** 课程管理页面初始化End **/
+/** 课程添加页面初始化Start **/
+$(document).on("pageInit", "#courseaddeditform", function(e, id, $page) {
+    sysUserInfo=getUserInfo();
+    changcourseimg();
+    //初始化课件分类，便于绑定picker
+    getAjax(javaserver + "/knowledge/findKnowledgeList", {userId:sysUserInfo.user_ID,
+        orgId:sysUserInfo.organization_ID,
+        powerLV:sysUserInfo.powerLV
+      },function(data){
+        data = strToJson(data);
+        var CtypeStr = "";
+        if(data.errorcode == "0"){
+          for(var i = 0; i<data.datas.length;i++){
+            CtypeStr+="<option value=\""+data.datas[i].knowledge_Id+"\">"+data.datas[i].knowledge_Name+"</option>";
+          }
+          $(".coursetype").append(CtypeStr);
+        }
+    });
+    AddChaper(null);  //初始化章节
+    AddNodules(null);  //初始化小结
+});
+
+function IsOpenCourse(){
+  if($(".isopensourse").val() == "0"){
+    $(".isopensourse").val("1");
+  }else {
+    $(".isopensourse").val("0");
+  }
+}
+//添加课程下一步上一步
+function changedivshow(flag){
+  if(flag=="1"){
+    $("#courseaddeditone").hide();
+    $("#courseaddedittwo").show();
+  }else{
+    $("#courseaddeditone").show();
+    $("#courseaddedittwo").hide();
+  }
+}
+//取消添加课程
+function coursedetailcancel(){
+  $.confirm("确定取消添加课程吗?", function () {
+    $.router.loadPage({
+      url: "courselist.html",
+      noAnimation: true,
+      replace: true
+    });
+  });
+}
+//随机改变课程封面
+function changcourseimg(){
+   var imgNum = Math.round(Math.random() * 7);
+   $(".courseimg").attr("src", domain + "/images/train/fengmian00" + imgNum + ".gif");
+}
+//上传课程封面
+function fileupcourseimg(){
+  api.getPicture({
+    sourceType: 'library',
+    encodingType: 'jpg',
+    mediaValue: 'pic',
+    destinationType: 'base64',
+    allowEdit: true,
+    quality: 80,
+    //targetWidth: 300,
+    //targetHeight: 100,
+    saveToPhotoAlbum: false
+}, function(ret, err) {
+    if (ret) {
+        $.showIndicator();
+        var imgurl = strToJson(ret).base64Data;
+        var form=document.forms[0];
+        var formData = new FormData(form);   //这里连带form里的其他参数也一起提交了,如果不需要提交其他参数可以直接FormData无参数的构造函数
+        //convertBase64UrlToBlob函数是将base64编码转换为Blob
+        formData.append("file",convertBase64UrlToBlob(imgurl), "file_"+Date.parse(new Date())+".jpg");
+        formData.append("state","1");
+        formData.append("userid",sysUserInfo.user_ID);
+        $.ajax({
+          url : javafile + "/file/uploadCover",
+          type : "POST",
+          data : formData,
+          dataType:"json",
+          processData : false,         // 告诉jQuery不要去处理发送的数据
+          contentType : false,        // 告诉jQuery不要去设置Content-Type请求头
+          success:function(data){
+            setTimeout(function () {
+                $.hideIndicator();$.showIndicator();
+            }, 10);
+              $(".courseimg").attr("src", data.errormsg);
+          },
+          xhr:function(){            //在jquery函数中直接使用ajax的XMLHttpRequest对象
+              var xhr = new XMLHttpRequest();
+              xhr.upload.addEventListener("progress", function(evt){
+                  if (evt.lengthComputable) {
+                      var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+                      //console.log("正在提交."+percentComplete.toString() + '%');        //在控制台打印上传进度
+                  }
+              }, false);
+              return xhr;
+          }
+        });
+    } else {
+        setTimeout(function () {
+            $.hideIndicator();
+        }, 10);
+        if(err.msg.indexOf("canceled") < 0){
+          $.toast("上传失败");
+        }
+    }
+});
+}
+//修改章节名称、修改小结名称
+function ChangeChapterName(obj) {
+  $.prompt('请填写章节名称','', function (value) {
+      $(obj).parent().find("span").text(value);
+  });
+}
+//删除章节
+function Deletechapter(obj){
+  $.confirm('确定删除该章节吗?', function () {
+      $(obj).parent().parent().remove();
+      $.toast("删除成功");
+  });
+}
+//删除章节下的小结
+function Deletenodulesli(obj){
+  $.confirm('确定删除该小节吗?', function () {
+      $(obj).parent().parent().parent().remove();
+      $.toast("删除成功");
+  });
+}
+//修改小结的类型
+function changenodulestypebtn(obj) {
+  var propoverHtml = "";
+  var id = $(obj).attr("id");
+  propoverHtml += "<div class=\'popover corsetypeset\' id=\'corsetypeset\'>";
+  propoverHtml += "     <div class=\'popover-angle no-top\'></div>";
+  propoverHtml += "     <div class=\'popover-inner\'>";
+  propoverHtml += "           <div class=\'list-block\'>";
+  propoverHtml += "               <ul>";
+  propoverHtml += "                  <li><a href=\'#\' class=\'list-button item-link\' onClick=\'changenodulestype(this,0,\""+id+"\")\'><i class=\'icon iconfont icon-shipin\'></i>视频</a></li>";
+  propoverHtml += "                  <li><a href=\'#\' class=\'list-button item-link\' onClick=\'changenodulestype(this,1,\""+id+"\")\'><i class=\'icon iconfont icon-zhishi\'></i>文档</a></li>";
+  propoverHtml += "                  <li><a href=\'#\' class=\'list-button item-link\' onClick=\'changenodulestype(this,2,\""+id+"\")\'><i class=\'icon iconfont icon-kaoshixinxi\'></i>图文</a></li>";
+  propoverHtml += "                  <li><a href=\'#\' class=\'list-button item-link\' onClick=\'changenodulestype(this,3,\""+id+"\")\'><i class=\'icon iconfont icon-my-zhibo-copy\'></i>直播</a></li>";
+  propoverHtml += "                  <li><a href=\'#\' class=\'list-button item-link\' onClick=\'changenodulestype(this,4,\""+id+"\")\'><i class=\'icon iconfont icon-shuju\'></i>线下</a></li>";
+  propoverHtml += "                  <li><a href=\'#\' class=\'list-button item-link\' onClick=\'changenodulestype(this,5,\""+id+"\")\'><i class=\'icon iconfont icon-exampaper\'></i>试卷</a></li>";
+  propoverHtml += "               </ul>";
+  propoverHtml += "           </div>";
+  propoverHtml += "       </div>";
+  propoverHtml += " </div>";
+  $.popover(propoverHtml, $(obj));
+}
+//修改小结类型，并且找到对应的对象
+function changenodulestype(obj,type, id) {
+  $("#" + id).html($(obj).html());
+}
+//添加章节
+function AddChaper(obj){
+  var chaperHtml = "";
+  var zhangjieid = guid();
+  chaperHtml += "<div class=\'card cardli\' data='"+zhangjieid+"' id='"+zhangjieid+"'>";
+  chaperHtml += "           <div class=\"card-header\"><i class=\"icon iconfont icon-bianji\" onclick=\"ChangeChapterName(this)\"></i><span>章节名称</span><i class=\"icon iconfont icon-guanbi pull-right\" onclick=\"Deletechapter(this)\"></i></div>";
+  chaperHtml += "                <div class=\'card-content\'>";
+  chaperHtml += "                  <div class=\'list-block\'>";
+  chaperHtml += "                    <ul>";
+  // chaperHtml += "                      <li>";
+  // chaperHtml += "                        <a href=\'#\' class=\'item-link item-content\' style=\'height: 0.75rem;min-height: 1.75rem;padding:0 0.75rem\'>";
+  // chaperHtml += "                          <div class=\'item-inner\' style=\'font-size: 14px;\'>";
+  // chaperHtml += "                            <div class=\'item-title\'>链接 1</div>";
+  // chaperHtml += "                          </div>";
+  // chaperHtml += "                        </a>";
+  // chaperHtml += "                      </li>";
+  chaperHtml += "                    </ul>";
+  chaperHtml += "                  </div>";
+  chaperHtml += "                </div>";
+  chaperHtml += "                <div class=\'card-footer\' style=\'padding: 0.2rem 0.75rem;min-height: 0.5rem;display: block;text-align: center;\' onclick=\'AddNodules(this)\'><i class=\'icon iconfont icon-jia1\'></i>添加小节</div>";
+  chaperHtml += "              </div>";
+  if(obj != null){
+    console.log(obj);
+    $(obj).before(chaperHtml);
+  }else {
+    $("#courseinfomian").html(chaperHtml);
+    $("#courseinfomian").append("<div class=\"content-block\" style=\"margin:0;\">");
+    $("#courseinfomian").append("   <a href=\"#\" class=\"button\" onclick=\"AddChaper(this)\"><i class=\"icon iconfont icon-jia1\"></i>添加章节</a>");
+    $("#courseinfomian").append("</div>");
+  }
+}
+//添加小结
+function AddNodules(obj) {
+  var chapterid = guid();
+  var noduleHtml = "";
+  noduleHtml += "<li data='"+chapterid+"' id='"+chapterid+"'>";
+  noduleHtml += "     <a href=\'#\' class=\'item-link item-content\' style=\'height: 0.75rem;min-height: 1.75rem;padding:0 0.75rem\'>";
+  noduleHtml += "       <div class=\'item-inner nodule-item-inner\' style=\'font-size: 14px;\'>";
+  noduleHtml += "          <div class=\'item-title\'><span class=\"chaptertitle\">点击选择文件</span><i class=\'icon iconfont icon-bianji\' onclick=\'courseGetvidoAndfile(\""+chapterid+"\")\'><label class=\"chapterobj\" style=\"display:none;\"></label></i></div>";
+  noduleHtml += "          <div class=\'item-after\'>";
+  noduleHtml += "              <div id=\'chaptertype\'><i class=\'icon iconfont icon-shezhi\'></i>设置</span></div>";
+  noduleHtml += "                 <i class=\'icon iconfont icon-guanbi pull-right nodulesli\' onclick=\'Deletenodulesli(this)\'></i>";
+  noduleHtml += "              </div>";
+  noduleHtml += "          </div>";
+  noduleHtml += "     </a>";
+  noduleHtml += "</li>";
+  if(obj != null){
+    $(obj).parent().find("ul").append(noduleHtml);
+  }else {
+    $("#courseinfomian .card").eq(0).find("ul").html(noduleHtml);
+  }
+}
+//设置小结内容  id为小姐的id
+var xiaojieassignmentid = "";
+function  courseGetvidoAndfile(id){
+  $.popup('.popup-zhishiku');
+  xiaojieassignmentid = id;
+  GetvidoAndfiles(1, 15, 2);
+  GetvidoAndfiles(1, 15, 1);
+}
+function GetMoreC_shipin(){
+  var pageIndex=$("#C_shipinpageIndex").html();
+  pageIndex=parseInt(pageIndex)+1;
+  GetvidoAndfiles(pageIndex, 15, "2");
+}
+function GetMoreC_wendang(){
+  var pageIndex=$("#C_wendangpageIndex").html();
+  pageIndex=parseInt(pageIndex)+1;
+  GetvidoAndfiles(pageIndex, 15, "1");
+}
+
+//从知识库中筛选文件  id要插入的地方  type 1 文档  2视频
+function GetvidoAndfiles(pageIndex,pageSize,type){
+  var id = xiaojieassignmentid;
+  getAjax(javaserver + "/course/queryFileType", {userid:sysUserInfo.user_ID,fid:0,orgid:sysUserInfo.organization_ID,pageIndex:pageIndex,pageSize:pageSize,type:type,powerLV:sysUserInfo.powerLV}, function(rs){
+    rs = strToJson(rs);
+    if(rs.errorcode == "0"){
+      if(rs.datas.length > 0){
+        var wendangStr = "";
+        for(var i = 0; i < rs.datas.length; i++){
+          var clickevents = "";
+          var typeimgurl = "";
+          var isclosepopup = "";
+          if(rs.datas[i].fileType == "folder"){
+              clickevents = "courseopenfolder(this)";
+              typeimgurl = "../../../images/train/folder_56.png";
+          }else if(rs.datas[i].fileType == "docx" || rs.datas[i].fileType == "doc") {
+              clickevents = "ObtainKnowObj(\""+id+"\",this, \""+type+"\")";
+              typeimgurl = "../../../images/train/word_56.png";
+              isclosepopup = "close-popup";
+          }else if(rs.datas[i].fileType == "xls" || rs.datas[i].fileType == "xlsx") {
+              clickevents = "ObtainKnowObj(\""+id+"\",this, \""+type+"\")";
+              typeimgurl = "../../../images/train/excel_56.png";
+              isclosepopup = "close-popup";
+          }else if(rs.datas[i].fileType == "flv" || rs.datas[i].fileType == "mp4") {
+              clickevents = "ObtainKnowObj(\""+id+"\",this, \""+type+"\")";
+              typeimgurl = "../../../images/train/wmw_56.png";
+              isclosepopup = "close-popup";
+          }else if(rs.datas[i].fileType == "ckt") {
+              clickevents = "ObtainKnowObj(\""+id+"\",this, \""+type+"\")";
+              typeimgurl = "../../../images/train/ckt_56.png";
+              isclosepopup = "close-popup";
+          }else if(rs.datas[i].fileType == "ppt" || rs.datas[i].fileType == "pptx") {
+              clickevents = "ObtainKnowObj(\""+id+"\",this, \""+type+"\")";
+              typeimgurl = "../../../images/train/ppt_56.png";
+              isclosepopup = "close-popup";
+          }else if(rs.datas[i].fileType == "pdf") {
+              clickevents = "ObtainKnowObj(\""+id+"\",this, \""+type+"\")";
+              typeimgurl = "../../../images/train/pdf_56.png";
+              isclosepopup = "close-popup";
+          }
+          wendangStr += "<li onclick='"+clickevents+"' class='"+isclosepopup+"'>";
+          wendangStr += "  <span style='display:none;'>"+ JSON.stringify(rs.datas[i])+"</span>";
+          wendangStr += "  <a href=\'#\' class=\'item-link item-content\'>";
+          wendangStr += "      <div class=\'item-media\'><img src='"+typeimgurl+"' width=\"40\"></div>";
+          wendangStr += "      <div class=\'item-inner\'>";
+          wendangStr += "        <div class=\'item-title\'>"+rs.datas[i].fileName+"</div>";
+          wendangStr += "      </div>";
+          wendangStr += "  </a>";
+          wendangStr += "</li>";
+        }
+         if(type == "1" || type == 1){  //type 1 文档  2视频
+           if(pageIndex == "1"){
+             $("#c_wendanglist").html(wendangStr);
+           }else {
+             $("#c_wendanglist").append(wendangStr);
+           }
+           if(pageIndex>=rs.pageCount){
+              $("#wendangmoreuserbtn").hide();
+           }else{
+              $("#wendangmoreuserbtn").show();
+           }
+           $("#C_wendangpageIndex").html(pageIndex);
+         }else{
+           if(pageIndex == "1"){
+             $("#c_shipinlist").html(wendangStr);
+           }else {
+             $("#c_shipinlist").append(wendangStr);
+           }
+           if(pageIndex>=rs.pageCount){
+              $("#shipinmoreuserbtn").hide();
+           }else{
+              $("#shipinmoreuserbtn").show();
+           }
+           $("#C_shipinpageIndex").html(pageIndex);
+         }
+      }
+    }
+  });
+}
+///选择文件
+function ObtainKnowObj(id,obj, type){
+  var xiaojieObj = $(obj).find("span").html();
+  var fileName = strToJson(xiaojieObj).fileName;
+  var fileext = fileName.substring(fileName.lastIndexOf('.') + 1);
+  $("#" + id).find(".chaptertitle").text(fileName.substring(0,fileName.lastIndexOf('.')));
+  if(fileext == "docx" || fileext == "doc") {
+      $("#" + id).find(".item-after").find("div").html("<i class=\"icon iconfont icon-intro\"></i>文档");
+  }else if(fileext == "xls" || fileext == "xlsx") {
+      $("#" + id).find(".item-after").find("div").html("<i class=\"icon iconfont icon-shipin4\"></i>视频");
+  }
+  $("#" + id).find(".chapterobj").html(xiaojieObj);
+  if(type == "1"){
+    $("#" + id).find(".chapterobj").attr("type", "2");
+  }else if(type == "2"){
+    $("#" + id).find(".chapterobj").attr("type", "1");
+  }
+}
+//保存课件信息
+function savecourseform(){
+  var courseId = QueryString("courseId");
+  var courseName = $(".coursename").val();
+  var courseDetailed = $(".courseintro").val();
+  var courseSum = 0;
+  var sectionNum = 0;
+  var knowledgeId = "";
+  if($(".coursetype").val() != "error"){
+    knowledgeId = $(".coursetype").val();
+  }
+  var courseImg = $(".courseimg").attr("src");
+  var  detailedJSON = "";//课程章节JOSN
+  var lecturer = $(".courseteacher").val();
+  var orgid = sysUserInfo.organization_ID;
+  var orgname = sysUserInfo.organization_Name;
+  var userid = sysUserInfo.user_ID;
+  var username = sysUserInfo.user_Name;
+  var isOpen =- $(".isopensourse").val();
+  var knowledgeJSON = ""; //知识结构json
+  var courseinfoRemark = $(".courseinfoRemark").val();
+  $(".cardli").each(function(index, obj){
+    var chid = $(obj).attr("data");;
+    var chapter = $(obj).find(".card-header").find("span").text();
+    var content = [];
+    $(obj).find("li").each(function (i, item) {
+      var CSID = $(obj).attr("data");
+      var CSNAME = $(obj).find(".item-title").text();
+      var CSTYPE = $(obj).find(".chapterobj").attr("type");
+      var stypeicon = "";
+      var stypename = "";
+      if(CSTYPE == "1"){
+        stypeicon = "#icon-shipin4";
+        stypename = "视频";
+      }else if(CSTYPE == "2"){
+        stypeicon = "#icon-intro";
+        stypename = "文档";
+      }
+    });
+  });
+}
+
+
+/**
+ * 将以base64的图片url数据转换为Blob
+ * @param urlData
+ *            用url方式表示的base64图片数据
+ */
+function convertBase64UrlToBlob(urlData){
+    var bytes=window.atob(urlData.split(',')[1]);        //去掉url的头，并转换为byte
+    //处理异常,将ascii码小于0的转换为大于0
+    var ab = new ArrayBuffer(bytes.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < bytes.length; i++) {
+        ia[i] = bytes.charCodeAt(i);
+    }
+    return new Blob( [ab] , {type : 'image/png'});
+}
+/** 课程添加页面初始化End  **/
+/** 成绩管理页面初始化Start **/
+$(document).on("pageInit", "#resultmanager", function(e, id, $page) {
+  sysUserInfo=getUserInfo();
+  //初始化课件分类，便于绑定picker
+  GetExamPaperList(1, 15, 1, "desc");
+})
+//获取试卷列表 排序的字段（1.试卷名称 2.上传时间 3 通过率 4 题目 数）
+function GetExamPaperList(pageIndex, pageSize, orderfiled, orderby){
+  getAjax(javaserver + "/paper/findByPaperPageSelectAndTrim", {pageIndex:pageIndex,pageSize:pageSize,userid:sysUserInfo.user_ID,
+      orgid:sysUserInfo.organization_ID,
+      powerLV:sysUserInfo.powerLV,
+      orderBy:orderby,
+      orderbyfield:orderfiled
+    },function(data){
+      data = strToJson(data);
+      var CtypeStr = "";
+      if(data.errorcode == "0"){
+        for(var i = 0; i<data.datas.length;i++){
+          CtypeStr += "<li data='"+data.datas[i].paper_id+"'>";
+          CtypeStr += "        <a href=\'#\' class=\'item-link item-content\'>";
+          CtypeStr += "          <div class=\'item-inner\'>";
+          CtypeStr += "            <div class=\'item-title-row\'>";
+          CtypeStr += "              <div class=\'item-title\'>"+data.datas[i].paperName+"</div>";
+          var IsRadom = "正常卷";
+          if(data.datas[i].paper_Random == "0"){
+            IsRadom = "随机卷";
+          }
+          CtypeStr += "              <div class=\'item-after\'>"+IsRadom+"</div>";
+          CtypeStr += "            </div>";
+          var passingNum = data.datas[i].paperNumber.paperThroughput_rate;
+          CtypeStr += "            <div class=\'item-subtitle\'>通过率:"+passingNum+"</div>";
+          CtypeStr += "          </div>";
+          CtypeStr += "        </a>";
+          CtypeStr += "      </li>";
+
+        }
+        $("#resultmanagerlist").append(CtypeStr);
+      }
+      if(pageIndex>=data.pageCount){
+         $("#moreuserbtn").hide();
+      }else{
+         $("#moreuserbtn").show();
+      }
+      $("#pageIndex").html(pageIndex);
+  });
+}
+function GetMoreResult(){
+  var pageIndex=$("#pageIndex").html();
+  pageIndex=parseInt(pageIndex)+1;
+  GetExamPaperList(pageIndex, 15, 1, "desc");
+}
+/** 成绩管理页面初始化End **/
+
+
+
 /******************************************查询方法结束*************************************************/
 //====================公共方法===========================
 /*获取格式化后文件大小*/
@@ -2676,15 +3480,15 @@ function GetADBanerAndStartImg(){
               });
               SetlocalStorage("HomeAddStr", adStr);
               if(huanyingad != ""){
-                $(".qidongyediv").show();
                 $(".qydongyeimg").css("background-image", "url('" + huanyingad + "')");
                 $(".huanyingad").text(getUserInfo().organization_Name);
-                setTimeout(function(){
-                  $(".qidongyediv").hide();
-                  $.showIndicator();
+                $(".qidongyediv").show();
+                var adtime = window.setTimeout(function(){
+                  $(".qidongyediv").css("display", "none");
                   window.location.href = "html/home.html";
-                  $.hideIndicator();
                 }, 5000);
+              }else {
+                  window.location.href = "html/home.html";
               }
             }
         }, function (err) {
@@ -2733,8 +3537,6 @@ function strToJson(str){
 //**********************************************************************
 //                              全局方法系列
 //**********************************************************************
-
-
 
 //夜间模式
 var $dark = $("#dark-switch").on("change", function() {
@@ -2798,6 +3600,7 @@ function getAjax(url, parm, callBack, callBackError, callBackType, mode,istongbu
   }
   catch(error) {
     $.alert("请求错误,请刷新重试！");
+    console.log(url);
     $.hideIndicator();
   }
 }
@@ -2877,7 +3680,7 @@ function getrenwuList(state,optype, pageIndex, pageSize){
 
                   }else if(data.errorcode==0&&(data.numCount==0||data.datas.length<=0)){
                       if(optype==1){
-                          $(".renwulist").html(renwunull);
+                      //    $(".renwulist").html(renwunull);
                       }else{
                           $("#stageLoadMore").hide();
                       }
@@ -3147,8 +3950,8 @@ function abc(){
         }
         console.log(data.data.filepreview);
         if (data.data.fileType == "pdf" || data.data.fileType == "docx" || data.data.fileType == "doc" || data.data.fileType == "xls" || data.data.fileType == "xlsx" || data.data.fileType == "ppt" || data.data.fileType == "pptx") {
-            $(".content_yulan").html("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
-            console.log("<iframe src='../../res/pdf2/officeshow/web/viewer.html?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
+            $(".content_yulan").html("<iframe src='http://file.jisupeixun.com/resources/pdf2/officeshow/web/viewer.html?file=?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
+            //console.log("<iframe src='http://file.jisupeixun.com/resources/pdf2/officeshow/web/viewer.html?file=?file=" + base64encode(encodeURI(data.data.filepreview)) + "' style='width:100%;border:0;height:100%;position:absolute;' ></iframe>");
         } else if (data.data.fileType == "txt") {
             $(".content_yulan").html("<iframe src='" + data.data.filepreview + "' style='width:100%;border:0' ></iframe>");
         } else if (data.data.fileType == "mp4") {

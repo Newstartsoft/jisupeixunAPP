@@ -42,8 +42,9 @@
 .head_top_menu a{ display: block; float: left; width: 20%; text-align: center; color: #fff; font-size: .7rem; }
 .head_top_menu a .iconfont{ font-size: 1.5rem; display: block; }
 .home_head .top{ padding:10px; position: fixed;    width: 100%;    top: 0;background-color: #39f;z-index:999 }
-.home_head .soso{ background-color: #fff; width: 85%; margin-left: 5%; border-radius: 20px; overflow: hidden;  float: left; position: relative;}
+.home_head .soso{ background-color: #fff; width: 80%; margin-left: 3%; border-radius: 20px; overflow: hidden;  float: left; position: relative;}
 .home_head .soso input{ border:0; width: 100%;  text-indent: 12px; font-size: .7rem; color: #333;padding: 7px;}
+.home_head .saoyisao .iconfont{ top: 0; color: #fff; font-size: 1.2rem;}
 .home_head .soso .iconfont{ position: absolute; right: 10px;top: 0; color: #39f; font-size: 1rem; }
 .home_head .xiaoxi{ float: right;      margin-top: -5px;}
 .home_head .xiaoxi .iconfont{ font-size: 1.3rem; color: #fff; margin-top: -.2rem}
@@ -70,3 +71,5 @@
 .tixingdiv li .jinji{ background-color: #ffa800; }
 .swiper-slide img{ width: 100%; }
 #courseDetailed{word-break: break-all;}
+.nodule-item-inner{padding-right:0px !important; background-image: none !important;}
+.nodulesli{pading:0 10px;}
